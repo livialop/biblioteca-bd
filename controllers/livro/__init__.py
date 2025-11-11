@@ -1,5 +1,5 @@
 from flask import render_template, redirect, url_for, request, Blueprint, flash
-from flask_login import login_required
+from flask_login import login_required, current_user
 from sqlalchemy import text
 from config import Usuario, ENGINE
 
@@ -93,6 +93,7 @@ def add_livro():
 
                 flash(f"Livro '{titulo}' adicionado com sucesso.", 'success')
                 return redirect(url_for('livros.view_livro'))
+    
     return render_template('add_livro.html')
 
 @livros_bp.route('/view_livros')
