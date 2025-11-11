@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block head %}
+    {% block title %} Register {% endblock title %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/register.css') }}">
+{% endblock head %}
+
+{% block content %}
+    {% include "components/flash.html" %}
+    <form action="{{ url_for('auth.register')}}" method="post">
+        <label for="nome">Nome:</label>
+        <input type="text" name="nome" placeholder="nome" required>
+
+        <label for="email">Email:</label>
+        <input type="text" name="email" placeholder="email" required>
+
+        <label for="senha">Número de telefone:</label>
+        <input type="number" name="numero_telefone" placeholder="número de telefone" maxlength="15">
+
+        <label for="senha">Senha:</label>
+        <input type="password" name="senha" placeholder="senha" required>
+
+        <button>Enviar</button>
+    </form>
+{% endblock content %}

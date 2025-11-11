@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block head %}
+    {% block title %}Login{% endblock title %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/register.css') }}">
+{% endblock head %}
+
+{% block content %}
+    {% include "components/flash.html" %}
+
+    <form action="{{ url_for('auth.login') }}" method="post">
+        <label for="email">Email</label>
+        <input type="text" name="email" placeholder="Email">
+
+        <label for="senha">Senha</label>
+        <input type="password" name="senha" placeholder="Senha">
+
+        <button>Enviar</button>
+    </form>
+
+{% endblock content %}
