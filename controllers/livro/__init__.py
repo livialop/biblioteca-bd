@@ -6,6 +6,8 @@ from config import Usuario, ENGINE
 
 livros_bp = Blueprint('livros', __name__, static_folder='static', template_folder='templates')
 
+# Fazer as rotas de CRUD pra todos as tabelas
+
 @livros_bp.route('/add_livro', methods=['GET', 'POST'])
 @login_required
 def add_livro():
