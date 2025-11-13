@@ -3,7 +3,7 @@ from flask_login import login_required
 from sqlalchemy import text
 from config import ENGINE
 
-editora_bp = Blueprint('editora', __name__, static_folder='static', template_folder='templates')
+editora_bp = Blueprint('editora', __name__, static_folder='../../static/style/', template_folder='../../templates/')
 
 @editora_bp.route('/add_editora', methods=['GET', 'POST'])
 @login_required

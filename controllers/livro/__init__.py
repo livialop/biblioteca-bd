@@ -1,79 +1,34 @@
 from flask import render_template, redirect, url_for, request, Blueprint, flash
 from flask_login import login_required, current_user
 from sqlalchemy import text
-from config import Usuario, ENGINE
+from config import ENGINE
 
 
-livros_bp = Blueprint('livros', __name__, static_folder='static', template_folder='templates')
+livros_bp = Blueprint('livros', __name__, static_folder='../../static/style/', template_folder='../../templates/')
 
-# Fazer as rotas de CRUD pra todos as tabelas
 
 @livros_bp.route('/add_livro', methods=['GET', 'POST'])
 @login_required
 def add_livro():
     if request.method == 'POST':
         titulo = request.form.get('titulo')
-        autor_nome = request.form.get('autor')
+        autor = request.form.get('autor')
         isbn = request.form.get('isbn')
         ano = request.form.get('ano_publicacao')
-        genero_nome = request.form.get('genero')
-        editora_nome = request.form.get('editora')
+        genero = request.form.get('genero')
+        editora = request.form.get('editora')
         quantidade = request.form.get('quantidade')
         resumo = request.form.get('resumo')
 
         with ENGINE.begin() as conn:
-                autor_id = None
-                if autor_nome:
-                    result = conn.execute(text(
-                        "SELECT ID_autor FROM Autores WHERE Nome_autor = :nome"
-                    ), {"nome": autor_nome}).fetchone()
-
-                    if result: # se já existir no banco de dados
-                        autor_id = result[0]
-                    else: # se não existir, adiciona
-                        conn.execute(text(
-                            "INSERT INTO Autores (Nome_autor) VALUES (:nome)"
-                        ), {"nome": autor_nome})
-                        
-                        result = conn.execute(text(
-                            "SELECT ID_autor FROM Autores WHERE Nome_autor = :nome"
-                        ), {"nome": autor_nome}).fetchone()
-                        autor_id = result[0]
-
-                # aqui faz a repetição do mesmo feito acima, só que para genero e depois para editora
-                genero_id = None
-                if genero_nome:
-                    result = conn.execute(text(
-                        "SELECT ID_genero FROM Generos WHERE Nome_genero = :nome"
-                    ), {"nome": genero_nome}).fetchone()
-
-                    if result:
-                        genero_id = result[0]
-                    else:
-                        conn.execute(text(
-                            "INSERT INTO Generos (Nome_genero) VALUES (:nome)"
-                        ), {"nome": genero_nome})
-                        result = conn.execute(text(
-                            "SELECT ID_genero FROM Generos WHERE Nome_genero = :nome"
-                        ), {"nome": genero_nome}).fetchone()
-                        genero_id = result[0]
-
-                editora_id = None
-                if editora_nome:
-                    result = conn.execute(text(
-                        "SELECT ID_editora FROM Editoras WHERE Nome_editora = :nome"
-                    ), {"nome": editora_nome}).fetchone()
-
-                    if result:
-                        editora_id = result[0]
-                    else:
-                        conn.execute(text(
-                            "INSERT INTO Editoras (Nome_editora) VALUES (:nome)"
-                        ), {"nome": editora_nome})
-                        result = conn.execute(text(
-                            "SELECT ID_editora FROM Editoras WHERE Nome_editora = :nome"
-                        ), {"nome": editora_nome}).fetchone()
-                        editora_id = result[0]
+                autor_id = conn.execute(text("""SELECT ID_autor FROM Autores WHERE Nome_autor = :autor;""")
+                                        , {'autor': autor})
+                
+                genero_id = conn.execute(text("""SELECT ID_genero FROM Generos WHERE Nome_genero = :genero;""")
+                                        , {'genero': genero})
+                
+                editora_id = conn.execute(text("""SELECT ID_editora FROM Editoras WHERE Nome_editora = :editora;""")
+                                        , {'editora': editora})
 
                 # após isso, insere a informacao no banco de dados
                 conn.execute(text("""
@@ -94,15 +49,29 @@ def add_livro():
                 flash(f"Livro '{titulo}' adicionado com sucesso.", 'success')
                 return redirect(url_for('livros.view_livro'))
     
-    return render_template('add_livro.html')
+    
+    with ENGINE.connect() as conn:
+        autores = conn.execute(text("SELECT Nome_autor FROM Autores;")).mappings()
+        generos = conn.execute(text("SELECT Nome_genero FROM Generos;")).mappings()
+        editoras = conn.execute(text("SELECT Nome_editora FROM Editoras;")).mappings()
+    return render_template('add_livro.html', autores=autores, generos=generos, editoras=editoras)
+
+
 
 @livros_bp.route('/view_livros')
 @login_required
 def view_livro():
-    query = text("SELECT * FROM Livros;")
-    with ENGINE.connect() as conn:
-        livros = conn.execute(query).mappings().fetchall()
+    with ENGINE.begin() as conn:
+        livros = conn.execute(text("""
+            SELECT l.ID_livro, l.Titulo, a.Nome_autor, l.ISBN, l.Ano_publicacao, g.Nome_genero, e.Nome_editora, l.Quantidade_disponivel, l.Resumo
+            FROM Livros l
+            JOIN Autores a ON l.Autor_id = a.ID_autor
+            JOIN Generos g ON l.Genero_id = g.ID_genero
+            JOIN Editoras e ON l.Editora_id = e.ID_editora;
+        """)).mappings().all()
     return render_template('view_livros.html', livros=livros)
+
+
 
 @livros_bp.route('/delete_livro/<int:livro_id>', methods=['POST'])
 @login_required
@@ -114,6 +83,8 @@ def delete_livro(livro_id):
     
     flash('Livro deletado com sucesso!', category='success')
     return redirect(url_for('livros.view_livro'))
+
+
 
 
 @livros_bp.route('/update_livro/<int:livro_id>', methods=['GET', 'POST'])
@@ -131,19 +102,28 @@ def update_livro(livro_id):
 
         query_update = text(f"""
             UPDATE Livros
-            SET Titulo = '{titulo}', Autor_id = (SELECT ID_autor FROM Autores WHERE Nome_autor = '{autor}'), ISBN = '{isbn}', Ano_publicacao = {ano_publicacao}, Genero_id = (SELECT ID_genero FROM Generos WHERE Nome_genero = '{genero}'), Editora_id = (SELECT ID_editora FROM Editoras WHERE Nome_editora = '{editora}'), Quantidade_disponivel = {quantidade}, Resumo = '{resumo}'
-            WHERE ID_livro = {livro_id};
+            SET Titulo = :titulo, Autor_id = (SELECT ID_autor FROM Autores WHERE Nome_autor = :autor), ISBN = :isbn, Ano_publicacao = :ano_publicacao, Genero_id = (SELECT ID_genero FROM Generos WHERE Nome_genero = :genero), Editora_id = (SELECT ID_editora FROM Editoras WHERE Nome_editora = :editora), Quantidade_disponivel = :quantidade, Resumo = :resumo
+            WHERE ID_livro = :livro_id;
         """)
 
-        with ENGINE.connect() as conn:
-            conn.execute(query_update)
-            conn.commit()
-            conn.close()
+        with ENGINE.begin() as conn:
+            conn.execute(query_update, {
+                "titulo": titulo,
+                "autor": autor,
+                "isbn": isbn,
+                "ano_publicacao": ano_publicacao,
+                "genero": genero,
+                "editora": editora,
+                "quantidade": quantidade,
+                "resumo": resumo,
+                "livro_id": livro_id
+            })
 
             flash('Livro atualizado com sucesso!', category='success')
             return redirect(url_for('livros.view_livro'))
         
     query_select = text(f"SELECT * FROM Livros WHERE ID_livro = :livro_id;")
+    
     with ENGINE.connect() as conn:
         livro = conn.execute(query_select, {"livro_id": livro_id}).mappings().fetchone()
     return render_template('update_livro.html', livro=livro)

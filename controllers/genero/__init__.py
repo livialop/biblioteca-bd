@@ -3,7 +3,7 @@ from flask_login import login_required
 from sqlalchemy import text
 from config import ENGINE
 
-genero_bp = Blueprint('genero', __name__, static_folder='static', template_folder='templates')
+genero_bp = Blueprint('genero', __name__, static_folder='../../static/style/', template_folder='../../templates/')
 
 @genero_bp.route('/add_genero', methods=['GET', 'POST'])
 @login_required

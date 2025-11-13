@@ -1,25 +1,19 @@
 from flask import render_template, redirect, url_for, request, Blueprint, flash
-from flask_login import login_required, current_user
+from flask_login import login_required
 from sqlalchemy import text
 from config import ENGINE
 
-emprestimo_bp = Blueprint('emprestimo', __name__, static_folder='static', template_folder='templates')
+emprestimo_bp = Blueprint('emprestimo', __name__, static_folder='../../static/style/', template_folder='../../templates/')
 
 @emprestimo_bp.route('/add_emprestimo', methods=['GET', 'POST'])
 @login_required
 def add_emprestimo():
     if request.method == 'POST':
-        # puxar id do usuário por flask_login 
         nome_usuario = request.form.get('nome_usuario')
-        # puxar o id do livro pelo nome do livro
         livro_titulo = request.form.get('livro_titulo')
-        # default now()
         data_emprestimo = request.form.get('data_emprestimo')
-        # data que o usuario quer devolver
         data_devolucao_prevista = request.form.get('data_devolucao_prevista')
-        # default 30 dias a partir de now()
         data_devolucao_real = request.form.get('data_devolucao_real')
-        # isso tem que ser o select entre os valores do ENUm (pendente, devolvido, etc)
         status_emprestimo = request.form.get('status_emprestimo')
 
         try:
@@ -38,6 +32,22 @@ def add_emprestimo():
                     'nome_usuario': nome_usuario
                 })
                 
+                if data_emprestimo is None or data_emprestimo == '':
+                    data_emprestimo = text('CURRENT_DATE();')
+                if data_devolucao_real is None or data_devolucao_real == '':
+                    data_devolucao_real = text('CURRENT_DATE() + INTERVAL \'30 days\'')
+                
+                disponibilidade = conn.execute(text("""
+                    SELECT Quantidade_disponivel FROM Livros
+                    WHERE ID_livro = :livro_id;
+                """), {
+                    'livro_id': livro_id
+                })
+
+                if disponibilidade.first()[0] <= 0:
+                    flash('Livro indisponível para empréstimo.', category='danger')
+                    return redirect(url_for('emprestimo.add_emprestimo'))
+                
                 conn.execute(text("""
                     INSERT INTO Emprestimos
                     (Usuario_id, Livro_id, Data_emprestimo, Data_devolucao_prevista, Data_devolucao_real, Status_emprestimo)
@@ -51,15 +61,37 @@ def add_emprestimo():
                     'status_emprestimo': status_emprestimo
                 })
 
-                # FALTA TERMINAR
+            flash('Empréstimo adicionado com sucesso!', category='success')
 
+            conn.exec_driver_sql(text("UPDATE Livros SET Quantidade_disponivel = Quantidade_disponivel - 1 WHERE ID_livro = :livro_id;"),
+                                 {'livro_id': livro_id})
+            
+            return redirect(url_for('emprestimo.view_emprestimo'))
+        
         except Exception as e:
             flash(f'Erro {e}', category='danger')
             return redirect(url_for('emprestimo.add_emprestimo'))
+    
 
-    return render_template('add_emprestimo.html')
+    with ENGINE.begin() as conn:
+        valores_status_emprestimo = conn.execute(text("""
+            SELECT DISTINCT Status_emprestimo FROM Emprestimos;    
+        """)).mappings().fetchall()
+
+    return render_template('add_emprestimo.html', valores_status_emprestimo=valores_status_emprestimo)
+
+
 
 @emprestimo_bp.route('/view_emprestimo')
 @login_required
 def view_emprestimo():
-    pass
+    with ENGINE.begin() as conn:
+        emprestimos = conn.execute(text("""
+            SELECT e.ID_emprestimo, u.Nome_usuario, l.Titulo, e.Data_emprestimo, e.Data_devolucao_prevista,
+                   e.Data_devolucao_real, e.Status_emprestimo
+            FROM Emprestimos e
+            JOIN Usuarios u ON e.Usuario_id = u.ID_usuario
+            JOIN Livros l ON e.Livro_id = l.ID_livro;
+        """)).mappings().fetchall()
+
+    return render_template('view_emprestimo.html', emprestimos=emprestimos)

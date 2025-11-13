@@ -4,7 +4,7 @@ from sqlalchemy import text
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import Usuario, ENGINE
 
-auth_bp = Blueprint('auth', __name__, static_folder='static', template_folder='templates')
+auth_bp = Blueprint('auth', __name__, static_folder='../../static/style/', template_folder='../../templates/')
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
