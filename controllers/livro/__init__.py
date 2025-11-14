@@ -22,13 +22,13 @@ def add_livro():
 
         with ENGINE.begin() as conn:
                 autor_id = conn.execute(text("""SELECT ID_autor FROM Autores WHERE Nome_autor = :autor;""")
-                                        , {'autor': autor})
+                                        , {'autor': autor}).mappings().fetchall()
                 
                 genero_id = conn.execute(text("""SELECT ID_genero FROM Generos WHERE Nome_genero = :genero;""")
-                                        , {'genero': genero})
+                                        , {'genero': genero}).mappings().fetchall()
                 
                 editora_id = conn.execute(text("""SELECT ID_editora FROM Editoras WHERE Nome_editora = :editora;""")
-                                        , {'editora': editora})
+                                        , {'editora': editora}).mappings().fetchall()
 
                 # após isso, insere a informacao no banco de dados
                 conn.execute(text("""
