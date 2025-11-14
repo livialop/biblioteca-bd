@@ -74,7 +74,7 @@ def login():
                 login_user(user_obj)
 
                 flash('Login feito!', category='success')
-                return redirect(url_for('livros.view_livro')) # Depois mudar essa rota
+                return redirect(url_for('livros.view_livros')) # Depois mudar essa rota
             else:
                 flash('Email ou senha incorretos', category='error')
 

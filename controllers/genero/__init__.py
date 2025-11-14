@@ -42,7 +42,7 @@ def view_generos():
     return render_template('view_generos.html', generos=generos)
 
 
-@genero_bp.route('/delete_genero/<int: genero_id>', methods=['POST'])
+@genero_bp.route('/delete_genero/<int:genero_id>', methods=['POST'])
 @login_required
 def delete_genero(genero_id):
     with ENGINE.connect() as conn:
@@ -56,7 +56,7 @@ def delete_genero(genero_id):
     return redirect(url_for('genero.view_generos'))
 
 
-@genero_bp.route('/update_genero/<int: genero_id>', methods=['GET', 'POST'])
+@genero_bp.route('/update_genero/<int:genero_id>', methods=['GET', 'POST'])
 @login_required
 def update_genero(genero_id):
     if request.method == 'POST':

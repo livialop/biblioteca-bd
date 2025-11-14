@@ -44,7 +44,7 @@ def view_editoras():
     return render_template('view_editoras', editoras=editoras)
 
 
-@editora_bp.route('/delete_editora/<int: editora_id>', methods=['POST'])
+@editora_bp.route('/delete_editora/<int:editora_id>', methods=['POST'])
 @login_required
 def delete_editora(editora_id):
     with ENGINE.begin() as conn:
@@ -58,7 +58,7 @@ def delete_editora(editora_id):
     return redirect(url_for('editora.add_editora'))
 
 
-@editora_bp.route('/update_editora/<int: editora_id>', methods=['GET', 'POST'])
+@editora_bp.route('/update_editora/<int:editora_id>', methods=['GET', 'POST'])
 @login_required
 def update_editora(editora_id):
     if request.method == 'POST':

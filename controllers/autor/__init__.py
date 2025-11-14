@@ -50,7 +50,7 @@ def view_autores():
 
 
 
-@autor_bp.route('/delete_autor/<int: autor_id>', methods=['POST'])
+@autor_bp.route('/delete_autor/<int:autor_id>', methods=['POST'])
 @login_required
 def delete_autor(autor_id):
     with ENGINE.begin() as conn:
@@ -65,7 +65,7 @@ def delete_autor(autor_id):
 
 
 
-@autor_bp.route('/update_autor/<int: autor_id>', methods=['GET', 'POST'])
+@autor_bp.route('/update_autor/<int:autor_id>', methods=['GET', 'POST'])
 @login_required
 def update_autor(autor_id):
     if request.method == 'POST':
