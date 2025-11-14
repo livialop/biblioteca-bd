@@ -8,9 +8,17 @@
     <title>{% block title %} {% endblock title %}</title>
     {% endblock head %}
 </head>
+
+
 <body>
+
+    {% if 'login' not in request.path and 'register' not in request.path %}
+        {% include 'components/navbar.html' %}
+    {% endif %}
+
     {% block content %}
-    
     {% endblock content %}
 </body>
+
+
 </html>
