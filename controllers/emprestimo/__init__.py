@@ -82,9 +82,9 @@ def add_emprestimo():
 
 
 
-@emprestimo_bp.route('/view_emprestimo')
+@emprestimo_bp.route('/view_emprestimos')
 @login_required
-def view_emprestimo():
+def view_emprestimos():
     with ENGINE.begin() as conn:
         emprestimos = conn.execute(text("""
             SELECT e.ID_emprestimo, u.Nome_usuario, l.Titulo, e.Data_emprestimo, e.Data_devolucao_prevista,
@@ -94,4 +94,53 @@ def view_emprestimo():
             JOIN Livros l ON e.Livro_id = l.ID_livro;
         """)).mappings().fetchall()
 
-    return render_template('view_emprestimo.html', emprestimos=emprestimos)
+    return render_template('view_emprestimos.html', emprestimos=emprestimos)
+
+
+
+@emprestimo_bp.route('/delete_emprestimo/<int:emprestimo_id>', methods=['POST'])
+@login_required
+def delete_emprestimo(emprestimo_id):
+    with ENGINE.begin() as conn:
+        conn.execute(text(
+            """DELETE FROM Emprestimos WHERE ID_emprestimo = :emprestimo_id"""
+        ), {
+            'emprestimo_id': emprestimo_id
+        })
+
+    flash('Empréstimo deletado com sucesso.', category='success')
+    return redirect(url_for('emprestimo.view_emprestimos'))
+
+
+@emprestimo_bp.route('/update_emprestimo/<int:emprestimo_id>', methods=['GET', 'POST'])
+@login_required
+def update_emprestimo(emprestimo_id):
+    if request.method == 'POST':
+        # Não pode mudar o usuário do empréstimo e nem pode mudar o livro emprestado
+        # O que muda mudar: Status do empréstimo, data de devolução real
+
+        status_emprestimo = request.form.get('status_emprestimo')
+        data_devolucao_real = request.form.get('data_devolucao_real')
+
+        with ENGINE.begin() as conn:
+            conn.execute(text(
+                """UPDATE Emprestimos
+                SET Status_emprestimo = :status_emprestimo, Data_devolucao_real = :data_devolucao_real
+                WHERE ID_emprestimo = :emprestimo_id"""
+            ), {
+                'status_emprestimo': status_emprestimo,
+                'data_devolucao_real': data_devolucao_real,
+                'emprestimo_id': emprestimo_id
+            })
+
+            flash('Empréstimo atualizado com sucesso!', category='success')
+            return redirect(url_for('emprestimo.view_emprestimos'))
+        
+    with ENGINE.begin() as conn:
+        emprestimo = conn.execute(text(
+            """SELECT * FROM Emprestimos WHERE ID_emprestimo = :emprestimo_id;"""
+        ), {
+            'emprestimo_id': emprestimo_id
+        }).mappings().fetchone()
+
+    return render_template('update_emprestimo.html', emprestimo=emprestimo)

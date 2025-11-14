@@ -31,3 +31,58 @@ def add_editora():
             return redirect(url_for('editora.add_editora'))
 
     return render_template('add_editora.html')
+
+
+@editora_bp.route('/view_editoras')
+@login_required
+def view_editoras():
+    with ENGINE.begin() as conn:
+        editoras = conn.execute(text("""
+            SELECT Nome_editora, Endereco_editora FROM Editoras;
+        """)).mappings().all()
+
+    return render_template('view_editoras', editoras=editoras)
+
+
+@editora_bp.route('/delete_editora/<int: editora_id>', methods=['POST'])
+@login_required
+def delete_editora(editora_id):
+    with ENGINE.begin() as conn:
+        conn.execute(text(
+            """DELETE FROM Editoras WHERE ID_editora = :editora_id;"""
+        ), {
+            'editora_id': editora_id
+        })
+    
+    flash('Editora deletada.', category='success')
+    return redirect(url_for('editora.add_editora'))
+
+
+@editora_bp.route('/update_editora/<int: editora_id>', methods=['GET', 'POST'])
+@login_required
+def update_editora(editora_id):
+    if request.method == 'POST':
+        nome_editora: str = request.form.get('nome_editora')
+        endereco_editora: str = request.form.get('endereco_editora')
+
+        with ENGINE.begin() as conn:
+            conn.execute(text(
+                """UPDATE Editoras 
+                SET Nome_editora = :nome_editora, Endereco_editora = :endereco_editora
+                WHERE ID_editora = :editora_id"""
+            ), {
+                'nome_editora': nome_editora,
+                'endereco_editora': endereco_editora,
+                'editora_id': editora_id
+            })
+
+        flash('Informações da editora atualizadas!', category='success')
+        return redirect(url_for('editora.view_editoras'))
+    
+    with ENGINE.begin() as conn:
+        editora = conn.execute(text(
+            """SELECT * FROM Editoras WHERE ID_editora = :editora_id;"""
+        ), {
+            'editora_id': editora_id
+        }).mappings().fetchone()
+        return render_template('update_editora.html', editora=editora)

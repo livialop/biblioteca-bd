@@ -47,7 +47,7 @@ def add_livro():
                 })
 
                 flash(f"Livro '{titulo}' adicionado com sucesso.", 'success')
-                return redirect(url_for('livros.view_livro'))
+                return redirect(url_for('livros.view_livros'))
     
     
     with ENGINE.connect() as conn:
@@ -60,10 +60,10 @@ def add_livro():
 
 @livros_bp.route('/view_livros')
 @login_required
-def view_livro():
+def view_livros():
     with ENGINE.begin() as conn:
         livros = conn.execute(text("""
-            SELECT l.ID_livro, l.Titulo, a.Nome_autor, l.ISBN, l.Ano_publicacao, g.Nome_genero, e.Nome_editora, l.Quantidade_disponivel, l.Resumo
+            SELECT l.Titulo, a.Nome_autor, l.ISBN, l.Ano_publicacao, g.Nome_genero, e.Nome_editora, l.Quantidade_disponivel, l.Resumo
             FROM Livros l
             JOIN Autores a ON l.Autor_id = a.ID_autor
             JOIN Generos g ON l.Genero_id = g.ID_genero
@@ -82,7 +82,7 @@ def delete_livro(livro_id):
         conn.commit()
     
     flash('Livro deletado com sucesso!', category='success')
-    return redirect(url_for('livros.view_livro'))
+    return redirect(url_for('livros.view_livros'))
 
 
 
@@ -120,7 +120,7 @@ def update_livro(livro_id):
             })
 
             flash('Livro atualizado com sucesso!', category='success')
-            return redirect(url_for('livros.view_livro'))
+            return redirect(url_for('livros.view_livros'))
         
     query_select = text(f"SELECT * FROM Livros WHERE ID_livro = :livro_id;")
     
