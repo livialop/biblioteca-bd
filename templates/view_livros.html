@@ -8,7 +8,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-  {% include "components/navbar.html" %}
+  {% include "components/navbar_add.html" %}
   <div class="p-4">
   <div class="container">
     <h1>Livros</h1>
@@ -44,7 +44,7 @@
           <td>{{ l.Editora_nome }}</td>
           <td>{{ l.Quantidade_disponivel }}</td>
           <td>
-            <a class="btn btn-sm btn-secondary" href="{{ url_for('livros.update_livro', livro_id=l.ID_livro) }}">Editar</a>
+            <a class="btn btn-sm btn-secondary" href="{{ url_for('livros.update_livro', livro_id=l.ID_livro) }}">Atualizar</a>           
             <form action="{{ url_for('livros.delete_livro', livro_id=l.ID_livro) }}" method="post" style="display:inline;">
               <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
             </form>
