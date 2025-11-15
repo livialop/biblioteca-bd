@@ -41,7 +41,7 @@ def view_editoras():
             SELECT Nome_editora, Endereco_editora FROM Editoras;
         """)).mappings().fetchall()
 
-    return render_template('view_editoras', editoras=editoras)
+    return render_template('view_editoras.html', editoras=editoras)
 
 
 @editora_bp.route('/delete_editora/<int:editora_id>', methods=['POST'])
