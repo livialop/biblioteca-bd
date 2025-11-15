@@ -8,19 +8,29 @@
 </head>
 <body>
   {% include "components/navbar.html" %}
+
   <div class="p-4">
     <div class="container">
       <h1>Adicionar Editora</h1>
+
       <form method="post" action="{{ url_for('editora.add_editora') }}">
+
         <div class="mb-3">
-          <label class="form-label">Nome</label>
-          <input class="form-control" name="nome" required>
+          <label class="form-label">Nome da Editora</label>
+          <input class="form-control" name="nome_editora" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Endereço</label>
+          <input class="form-control" name="endereco_editora">
         </div>
 
         <button class="btn btn-success" type="submit">Salvar</button>
-        <a class="btn btn-secondary" href="{{ url_for('livros.view_livros') }}">Cancelar</a>
+        <a class="btn btn-secondary" href="{{ url_for('livros.add_livro') }}">Cancelar</a>
+
       </form>
     </div>
   </div>
+
 </body>
 </html>
