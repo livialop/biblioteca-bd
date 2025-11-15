@@ -19,21 +19,19 @@
       <table class="table table-bordered table-striped">
         <thead>
           <tr>
-            <th>ID</th>
             <th>Livro</th>
             <th>Usuário</th>
             <th>Data Empréstimo</th>
-            <th>Data Devolução</th>
+            <th>Data Devolução Prevista</th>
           </tr>
         </thead>
         <tbody>
           {% for emp in emprestimos %}
           <tr>
-            <td>{{ emp.id }}</td>
             <td>{{ emp.livro.titulo }}</td>
             <td>{{ emp.usuario.nome }}</td>
-            <td>{{ emp.data_emprestimo }}</td>
-            <td>{{ emp.data_devolucao or '—' }}</td>
+            <td>{{ emp.Data_emprestimo }}</td>
+            <td>{{ emp.Data_devolucao_prevista or '—' }}</td>
           </tr>
           {% endfor %}
         </tbody>
