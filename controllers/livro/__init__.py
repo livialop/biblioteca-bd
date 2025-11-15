@@ -93,7 +93,14 @@ def update_livro(livro_id):
 
         query_update = text(f"""
             UPDATE Livros
-            SET Titulo = :titulo, Autor_id = (SELECT ID_autor FROM Autores WHERE Nome_autor = :autor), ISBN = :isbn, Ano_publicacao = :ano_publicacao, Genero_id = (SELECT ID_genero FROM Generos WHERE Nome_genero = :genero), Editora_id = (SELECT ID_editora FROM Editoras WHERE Nome_editora = :editora), Quantidade_disponivel = :quantidade, Resumo = :resumo
+            SET Titulo = :titulo,
+                Autor_id = :autor,
+                ISBN = :isbn,
+                Ano_publicacao = :ano_publicacao,
+                Genero_id = :genero,
+                Editora_id = :editora,
+                Quantidade_disponivel = :quantidade,
+                Resumo = :resumo
             WHERE ID_livro = :livro_id;
         """)
 
@@ -117,4 +124,8 @@ def update_livro(livro_id):
     
     with ENGINE.connect() as conn:
         livro = conn.execute(query_select, {"livro_id": livro_id}).mappings().fetchone()
-    return render_template('update_livro.html', livro=livro)
+        autores = conn.execute(text("SELECT * FROM Autores;")).mappings().all()
+        generos = conn.execute(text("SELECT * FROM Generos;")).mappings().all()
+        editoras = conn.execute(text("SELECT * FROM Editoras;")).mappings().all()
+
+    return render_template('update_livro.html', livro=livro, autores=autores, generos=generos, editoras=editoras)
