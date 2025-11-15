@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Editar Editora</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style/update_editora.css') }}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  {% include "components/navbar.html" %}
+
+  <div class="p-4">
+    <div class="container">
+      <h1>Editar Editora</h1>
+
+      <form method="post" action="{{ url_for('editora.update_editora', editora_id=editora.ID_editora) }}">
+        <div class="mb-3">
+          <label class="form-label">Nome da Editora</label>
+          <input class="form-control" name="nome_editora" value="{{ editora.Nome_editora }}" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Endereço da Editora</label>
+          <input class="form-control" name="endereco_editora" value="{{ editora.Endereco_editora }}" required>
+        </div>
+
+        <button class="btn btn-success" type="submit">Atualizar</button>
+        <a class="btn btn-secondary" href="{{ url_for('editora.view_editoras') }}">Cancelar</a>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
