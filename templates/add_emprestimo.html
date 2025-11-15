@@ -8,19 +8,56 @@
 </head>
 <body>
   {% include "components/navbar.html" %}
+  
   <div class="p-4">
     <div class="container">
       <h1>Adicionar Empréstimo</h1>
+
       <form method="post" action="{{ url_for('emprestimo.add_emprestimo') }}">
+
         <div class="mb-3">
-          <label class="form-label">Livro</label>
-          <input class="form-control" name="livro" required>
+          <label class="form-label">Nome do Usuário</label>
+          <input class="form-control" name="nome_usuario" required>
+        </div>
+
+
+        <div class="mb-3">
+          <label class="form-label">Título do Livro</label>
+          <input class="form-control" name="livro_titulo" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Data do Empréstimo</label>
+          <input type="date" class="form-control" name="data_emprestimo">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Data de Devolução Prevista</label>
+          <input type="date" class="form-control" name="data_devolucao_prevista" required>
+ 
+        <div class="mb-3">
+          <label class="form-label">Data de Devolução Real</label>
+          <input type="date" class="form-control" name="data_devolucao_real">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Status do Empréstimo</label>
+          <select class="form-select" name="status_emprestimo" required>
+            <option value="" selected disabled>Selecione</option>
+
+            {% for item in valores_status_emprestimo %}
+              <option value="{{ item.Status_emprestimo }}">{{ item.Status_emprestimo }}</option>
+            {% endfor %}
+          </select>
         </div>
 
         <button class="btn btn-success" type="submit">Salvar</button>
-        <a class="btn btn-secondary" href="{{ url_for('livros.view_livros') }}">Cancelar</a>
+        <a class="btn btn-secondary" href="{{ url_for('emprestimo.view_emprestimos') }}">Cancelar</a>
+
+
       </form>
     </div>
   </div>
+
 </body>
 </html>
