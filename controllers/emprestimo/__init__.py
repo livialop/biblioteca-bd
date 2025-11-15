@@ -66,7 +66,7 @@ def add_emprestimo():
             conn.exec_driver_sql(text("UPDATE Livros SET Quantidade_disponivel = Quantidade_disponivel - 1 WHERE ID_livro = :livro_id;"),
                                  {'livro_id': livro_id})
             
-            return redirect(url_for('emprestimo.view_emprestimo'))
+            return redirect(url_for('emprestimo.view_emprestimos'))
         
         except Exception as e:
             flash(f'Erro {e}', category='danger')
