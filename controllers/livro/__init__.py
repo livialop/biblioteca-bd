@@ -12,50 +12,39 @@ livros_bp = Blueprint('livros', __name__, static_folder='static', template_folde
 def add_livro():
     if request.method == 'POST':
         titulo = request.form.get('titulo')
-        autor = request.form.get('autor')
+        autor_id = request.form.get('autor')
         isbn = request.form.get('isbn')
         ano = request.form.get('ano_publicacao')
-        genero = request.form.get('genero')
-        editora = request.form.get('editora')
+        genero_id = request.form.get('genero')
+        editora_id = request.form.get('editora')
         quantidade = request.form.get('quantidade')
         resumo = request.form.get('resumo')
 
         with ENGINE.begin() as conn:
-                autor_id = conn.execute(text("""SELECT ID_autor FROM Autores WHERE Nome_autor = :autor;""")
-                                        , {'autor': autor}).mappings().fetchall()
-                
-                genero_id = conn.execute(text("""SELECT ID_genero FROM Generos WHERE Nome_genero = :genero;""")
-                                        , {'genero': genero}).mappings().fetchall()
-                
-                editora_id = conn.execute(text("""SELECT ID_editora FROM Editoras WHERE Nome_editora = :editora;""")
-                                        , {'editora': editora}).mappings().fetchall()
+            conn.execute(text("""
+                INSERT INTO Livros 
+                (Titulo, Autor_id, ISBN, Ano_publicacao, Genero_id, Editora_id, Quantidade_disponivel, Resumo)
+                VALUES (:titulo, :autor_id, :isbn, :ano, :genero_id, :editora_id, :quantidade, :resumo)
+            """), {
+                "titulo": titulo,
+                "autor_id": autor_id,
+                "isbn": isbn,
+                "ano": ano,
+                "genero_id": genero_id,
+                "editora_id": editora_id,
+                "quantidade": quantidade,
+                "resumo": resumo
+            })
 
-                # após isso, insere a informacao no banco de dados
-                conn.execute(text("""
-                    INSERT INTO Livros 
-                    (Titulo, Autor_id, ISBN, Ano_publicacao, Genero_id, Editora_id, Quantidade_disponivel, Resumo)
-                    VALUES (:titulo, :autor, :isbn, :ano, :genero, :editora, :quantidade, :resumo)
-                """), {
-                    "titulo": titulo,
-                    "autor": autor_id,
-                    "isbn": isbn,
-                    "ano": ano,
-                    "genero": genero_id,
-                    "editora": editora_id,
-                    "quantidade": quantidade,
-                    "resumo": resumo
-                })
+        flash(f"Livro '{titulo}' adicionado com sucesso.", 'success')
+        return redirect(url_for('livros.view_livros'))
 
-                flash(f"Livro '{titulo}' adicionado com sucesso.", 'success')
-                return redirect(url_for('livros.view_livros'))
-    
-    
     with ENGINE.connect() as conn:
-        autores = conn.execute(text("SELECT Nome_autor FROM Autores;")).mappings()
-        generos = conn.execute(text("SELECT Nome_genero FROM Generos;")).mappings()
-        editoras = conn.execute(text("SELECT Nome_editora FROM Editoras;")).mappings()
+        autores = conn.execute(text("SELECT ID_autor, Nome_autor FROM Autores;")).mappings()
+        generos = conn.execute(text("SELECT ID_genero, Nome_genero FROM Generos;")).mappings()
+        editoras = conn.execute(text("SELECT ID_editora, Nome_editora FROM Editoras;")).mappings()
+    
     return render_template('add_livro.html', autores=autores, generos=generos, editoras=editoras)
-
 
 
 @livros_bp.route('/view_livros')
