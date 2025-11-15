@@ -3,7 +3,7 @@ from flask_login import login_required
 from sqlalchemy import text
 from config import ENGINE
 
-emprestimo_bp = Blueprint('emprestimo', __name__, static_folder='../../static/style/', template_folder='../../templates/')
+emprestimo_bp = Blueprint('emprestimo', __name__, static_folder='static', template_folder='templates')
 
 @emprestimo_bp.route('/add_emprestimo', methods=['GET', 'POST'])
 @login_required

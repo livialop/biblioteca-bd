@@ -4,7 +4,7 @@ from sqlalchemy import text
 from config import ENGINE
 
 
-livros_bp = Blueprint('livros', __name__, static_folder='../../static/style/', template_folder='../../templates/')
+livros_bp = Blueprint('livros', __name__, static_folder='static', template_folder='templates')
 
 
 @livros_bp.route('/add_livro', methods=['GET', 'POST'])

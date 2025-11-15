@@ -3,7 +3,7 @@ from flask_login import login_required
 from sqlalchemy import text
 from config import ENGINE
 
-autor_bp = Blueprint('autor', __name__, static_folder='../../static/style/', template_folder='../../templates/')
+autor_bp = Blueprint('autor', __name__, static_folder='static', template_folder='templates')
 
 @autor_bp.route('/add_autor', methods=['GET', 'POST'])
 @login_required
