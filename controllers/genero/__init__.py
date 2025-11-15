@@ -81,7 +81,7 @@ def update_genero(genero_id):
             """SELECT * from Generos WHERE ID_genero = :genero_id"""
         ), {
             'genero_id': genero_id
-        })
+        }).mappings().fetchone()
 
     return render_template('update_genero.html', genero=genero)
 
