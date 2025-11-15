@@ -45,7 +45,7 @@
           <td>{{ l.Quantidade_disponivel }}</td>
           <td>
             <a class="btn btn-sm btn-secondary" href="{{ url_for('livros.update_livro', livro_id=l.ID_livro) }}">Editar</a>
-            <form action="{{ url_for('livros.delete_livro', livro_id=l.ID_livro) }}" method="post">
+            <form action="{{ url_for('livros.delete_livro', livro_id=l.ID_livro) }}" method="post" style="display:inline;">
               <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
             </form>
           </td>

@@ -12,11 +12,11 @@ livros_bp = Blueprint('livros', __name__, static_folder='static', template_folde
 def add_livro():
     if request.method == 'POST':
         titulo = request.form.get('titulo')
-        autor_id = request.form.get('autor')
+        autor_id = int(request.form.get('autor'))
         isbn = request.form.get('isbn')
         ano = request.form.get('ano_publicacao')
-        genero_id = request.form.get('genero')
-        editora_id = request.form.get('editora')
+        genero_id = int(request.form.get('genero'))
+        editora_id = int(request.form.get('editora'))
         quantidade = request.form.get('quantidade')
         resumo = request.form.get('resumo')
 
@@ -40,24 +40,26 @@ def add_livro():
         return redirect(url_for('livros.view_livros'))
 
     with ENGINE.connect() as conn:
-        autores = conn.execute(text("SELECT ID_autor, Nome_autor FROM Autores;")).mappings()
-        generos = conn.execute(text("SELECT ID_genero, Nome_genero FROM Generos;")).mappings()
-        editoras = conn.execute(text("SELECT ID_editora, Nome_editora FROM Editoras;")).mappings()
-    
-    return render_template('add_livro.html', autores=autores, generos=generos, editoras=editoras)
+        autores = conn.execute(text("SELECT * FROM Autores;")).mappings().all()
+        generos = conn.execute(text("SELECT * FROM Generos;")).mappings().all()
+        editoras = conn.execute(text("SELECT * FROM Editoras;")).mappings().all()
 
+    return render_template('add_livro.html',
+                           autores=autores,
+                           generos=generos,
+                           editoras=editoras)
 
 @livros_bp.route('/view_livros')
 @login_required
 def view_livros():
     with ENGINE.begin() as conn:
         livros = conn.execute(text("""
-            SELECT l.Titulo, a.Nome_autor, l.ISBN, l.Ano_publicacao, g.Nome_genero, e.Nome_editora, l.Quantidade_disponivel, l.Resumo
+            SELECT l.ID_livro, l.Titulo, a.Nome_autor AS Autor_nome, l.ISBN, l.Ano_publicacao, g.Nome_genero AS Genero_nome, e.Nome_editora AS Editora_nome, l.Quantidade_disponivel, l.Resumo
             FROM Livros l
             JOIN Autores a ON l.Autor_id = a.ID_autor
             JOIN Generos g ON l.Genero_id = g.ID_genero
             JOIN Editoras e ON l.Editora_id = e.ID_editora;
-        """)).mappings().all()
+        """)).mappings().fetchall()
     return render_template('view_livros.html', livros=livros)
 
 

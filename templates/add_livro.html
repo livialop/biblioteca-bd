@@ -12,7 +12,7 @@
   <div class="p-4">
   <div class="container">
     <h1>Adicionar Livro</h1>
-    <form method="post" action="{{ url_for('livros.add_livros') }}">
+    <form method="post" action="{{ url_for('livros.add_livro') }}">
       <div class="mb-3">
         <label class="form-label">Título</label>
         <input class="form-control" name="titulo" required>
@@ -20,7 +20,12 @@
 
       <div class="mb-3">
         <label class="form-label">Autor</label>
-        <input class="form-control" name="autor" required>
+        <select class="form-control" name="autor" required>
+          <option value="">Selecione um autor</option>
+          {% for autor in autores %}
+            <option value="{{ autor.ID_autor }}">{{ autor.Nome_autor }}</option>
+          {% endfor %}
+        </select>
       </div>
 
       <div class="mb-3">
@@ -35,12 +40,22 @@
 
       <div class="mb-3">
         <label class="form-label">Gênero</label>
-        <input class="form-control" name="genero" required>
+        <select class="form-control" name="genero" required>
+          <option value="" disabled selected>Selecione um gênero</option>
+          {% for genero in generos %}
+            <option value="{{ genero.ID_genero }}">{{ genero.Nome_genero }}</option>
+          {% endfor %}
+        </select>
       </div>
 
       <div class="mb-3">
         <label class="form-label">Editora</label>
-        <input class="form-control" name="editora" required>
+        <select class="form-control" name="editora" required>
+          <option value="" disabled selected>Selecione uma editora</option>
+          {% for editora in editoras %}
+            <option value="{{ editora.ID_editora }}">{{ editora.Nome_editora }}</option>
+          {% endfor %}
+        </select>
       </div>
 
       <div class="mb-3">

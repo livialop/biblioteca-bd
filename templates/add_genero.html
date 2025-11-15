@@ -8,17 +8,19 @@
 </head>
 <body>
   {% include "components/navbar.html" %}
+
   <div class="p-4">
     <div class="container">
       <h1>Adicionar Gênero</h1>
+
       <form method="post" action="{{ url_for('genero.add_genero') }}">
         <div class="mb-3">
-          <label class="form-label">Nome</label>
-          <input class="form-control" name="nome" required>
+          <label class="form-label">Nome do Gênero</label>
+          <input class="form-control" name="nome_genero" required>
         </div>
 
         <button class="btn btn-success" type="submit">Salvar</button>
-        <a class="btn btn-secondary" href="{{ url_for('livros.view_livros') }}">Cancelar</a>
+        <a class="btn btn-secondary" href="{{ url_for('genero.view_generos') }}">Cancelar</a>
       </form>
     </div>
   </div>
