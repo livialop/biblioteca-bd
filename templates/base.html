@@ -9,16 +9,23 @@
     {% endblock head %}
 </head>
 
-
 <body>
 
     {% if 'login' not in request.path and 'register' not in request.path %}
-        {% include 'components/navbar.html' %}
+        
+        {# Navbar das páginas ADD e UPDATE → botões de visualizar #}
+        {% if 'add' in request.path or 'update' in request.path %}
+            {% include 'components/navbar_view.html' %}
+        
+        {# Navbar das páginas VIEW → botões de adicionar #}
+        {% elif 'view' in request.path %}
+            {% include 'components/navbar_add.html' %}
+        {% endif %}
+    
     {% endif %}
 
     {% block content %}
     {% endblock content %}
 </body>
-
 
 </html>
