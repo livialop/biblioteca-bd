@@ -39,7 +39,7 @@ def view_editoras():
     with ENGINE.begin() as conn:
         editoras = conn.execute(text("""
             SELECT Nome_editora, Endereco_editora FROM Editoras;
-        """)).mappings().all()
+        """)).mappings().fetchall()
 
     return render_template('view_editoras', editoras=editoras)
 

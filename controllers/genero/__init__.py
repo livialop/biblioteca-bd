@@ -16,7 +16,7 @@ def add_genero():
                 conn.execute(text(
                     """INSERT INTO Generos
                         (Nome_genero)
-                        VALUE (:nome_genero)
+                        VALUES (:nome_genero)
                     """
                 ), {
                 'nome_genero': nome_genero
@@ -27,6 +27,7 @@ def add_genero():
         
         except Exception as e:
             flash(f'Erro: {str(e)}', category='danger')
+            print(e)
             return redirect(url_for('genero.add_genero'))
         
     return render_template('add_genero.html')
@@ -38,7 +39,7 @@ def view_generos():
     with ENGINE.begin() as conn:
         generos = conn.execute(text(
             """SELECT Nome_genero FROM Generos;"""
-        )).mappings().all()
+        )).mappings().fetchall()
     return render_template('view_generos.html', generos=generos)
 
 
