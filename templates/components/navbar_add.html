@@ -1,4 +1,11 @@
-<nav>
+<style>
+    hr {
+        border: none;
+        height: 0;
+    }
+</style>
+
+<nav class="nav-add">
     <a href="{{ url_for('livros.add_livro') }}">Adicionar Livro</a> |
     <a href="{{ url_for('editora.add_editora') }}">Adicionar Editora</a> |
     <a href="{{ url_for('genero.add_genero') }}">Adicionar Gênero</a> |

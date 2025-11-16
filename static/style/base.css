@@ -30,7 +30,6 @@ h1, h2, h3 {
 
 form {
     background-color: #ffffff;
-    padding: 25px;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.12);
 }
@@ -94,7 +93,7 @@ table {
 
 th {
     background: #0d6efd;
-    color: white !important;
+    color: rgb(0, 0, 0) !important;
     text-align: center;
 }
 
@@ -103,7 +102,20 @@ td {
 }
 
 
-nav {
+.nav-view {
+    background-color: #0d6efd;
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    position: fixed;
+    top: 48px;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.nav-add {
     background-color: #0d6efd;
     color: white;
     padding: 12px 20px;
@@ -114,7 +126,6 @@ nav {
     top: 0;
     width: 100%;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    z-index: 1000;
 }
 
 nav a {
@@ -125,4 +136,13 @@ nav a {
 
 nav a:hover {
     color: #dce9ff;
+}
+
+hr {
+    border: none;
+    height: 0;
+}
+
+#form-add {
+    padding: 20px;
 }

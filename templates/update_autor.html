@@ -8,13 +8,14 @@
 </head>
 
 <body>
+  {% include "components/navbar_add.html" %}
   {% include "components/navbar_view.html" %}
   
   <div class="p-4">
     {% include "components/flash.html" %}
     <div class="container">
       <h1>Editar Autor</h1>
-      <form method="post" action="{{ url_for('autor.update_autor', autor_id=autor.ID_autor) }}">
+      <form method="post" action="{{ url_for('autor.update_autor', autor_id=autor.ID_autor) }}" id="form-add">
 
         <div class="mb-3">
           <label class="form-label">Nome do autor</label>

@@ -1,4 +1,11 @@
-<nav>
+<style>
+    hr {
+        border: none;
+        height: 0;
+    }
+</style>
+
+<nav class="nav-view">
     <a href="{{ url_for('livros.view_livros') }}">Ver Livros</a> |
     <a href="{{ url_for('editora.view_editoras') }}">Ver Editoras</a> |
     <a href="{{ url_for('genero.view_generos') }}">Ver Gêneros</a> |

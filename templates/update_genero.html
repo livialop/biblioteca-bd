@@ -5,12 +5,13 @@
 {% endblock head %}
 
 {% block content %}
-
+    {% include "components/navbar_add.html" %}
+    {% include "components/navbar_view.html" %}
     {% include "components/flash.html" %}
 <div class="container mt-5">
     <h2 class="mb-4">Editar Gênero</h2>
 
-    <form action="{{ url_for('genero.update_genero', genero_id=genero.ID_genero) }}" method="POST">
+    <form action="{{ url_for('genero.update_genero', genero_id=genero.ID_genero) }}" method="POST" id="form-add">
 
         <div class="mb-3">
             <label for="nome_genero" class="form-label">Nome do Gênero</label>
