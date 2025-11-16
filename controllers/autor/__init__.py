@@ -43,7 +43,7 @@ def add_autor():
 def view_autores():
     with ENGINE.connect() as conn:
         autores = conn.execute(text("""
-            SELECT Nome_autor, Nacionalidade, Data_nascimento, Biografia
+            SELECT ID_autor, Nome_autor, Nacionalidade, Data_nascimento, Biografia
             FROM Autores;
     """)).mappings().all()
     return render_template('view_autores.html', autores=autores)    

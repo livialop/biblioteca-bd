@@ -38,7 +38,7 @@ def add_editora():
 def view_editoras():
     with ENGINE.begin() as conn:
         editoras = conn.execute(text("""
-            SELECT Nome_editora, Endereco_editora FROM Editoras;
+            SELECT ID_editora, Nome_editora, Endereco_editora FROM Editoras;
         """)).mappings().fetchall()
 
     return render_template('view_editoras.html', editoras=editoras)

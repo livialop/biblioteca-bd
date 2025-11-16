@@ -6,40 +6,18 @@ body {
 
 .container {
     background: #fff;
-    padding: 30px;
+    padding: 25px;
     border-radius: 12px;
     box-shadow: 0 3px 10px rgba(0,0,0,0.08);
     margin-top: 25px;
-    max-width: 750px;
 }
+
 
 h1 {
     font-size: 2rem;
     font-weight: 600;
-    color: #2c3e50;
     margin-bottom: 25px;
-}
-
-.form-label {
-    font-weight: 500;
     color: #2c3e50;
-}
-
-.form-control {
-    border-radius: 8px;
-    padding: 10px;
-    border: 1px solid #cfd6e1;
-    transition: 0.2s ease;
-}
-
-.form-control:focus {
-    border-color: #3b7ddd;
-    box-shadow: 0 0 0 2px rgba(59, 125, 221, 0.25);
-}
-
-textarea.form-control {
-    min-height: 130px;
-    resize: vertical;
 }
 
 
@@ -48,7 +26,6 @@ textarea.form-control {
     border-color: #3b7ddd;
     border-radius: 8px;
     font-weight: 500;
-    padding: 8px 16px;
 }
 
 .btn-primary:hover {
@@ -56,16 +33,53 @@ textarea.form-control {
     border-color: #346fcc;
 }
 
-.btn-secondary {
-    border-radius: 8px;
-    font-weight: 500;
-    padding: 8px 16px;
+
+.table {
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
 }
+
+.table thead {
+    background-color: #3b7ddd;
+    color: #fff;
+}
+
+.table thead th {
+    padding: 14px;
+    font-size: 0.95rem;
+}
+
+.table tbody td {
+    padding: 12px;
+    vertical-align: middle;
+    font-size: 0.93rem;
+}
+
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f0f4fb;
+}
+
+
+.table tbody tr:hover {
+    background-color: #e8effc;
+}
+
+
+p {
+    font-size: 1rem;
+    color: #555;
+}
+
 
 @media (max-width: 768px) {
     .container {
-        padding: 20px;
-        margin-top: 15px;
+        padding: 15px;
+    }
+
+    table {
+        font-size: 0.83rem;
     }
 
     h1 {

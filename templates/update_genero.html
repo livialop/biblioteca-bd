@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 
 {% block head %}
-    {% block title %}Editar Gênero{% endblock title %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='style/register.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/update_genero.css') }}">
 {% endblock head %}
 
 {% block content %}
+
+    {% include "components/flash.html" %}
 <div class="container mt-5">
     <h2 class="mb-4">Editar Gênero</h2>
 

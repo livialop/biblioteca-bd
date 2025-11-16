@@ -1,3 +1,4 @@
+
 body {
     background-color: #f5f7fa;
     font-family: "Inter", Arial, sans-serif;
@@ -5,19 +6,17 @@ body {
 }
 
 .container {
-    background: #fff;
+    background: #ffffff;
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-    margin-top: 25px;
-    max-width: 750px;
+    max-width: 600px;
 }
 
-h1 {
-    font-size: 2rem;
+h2 {
+    font-size: 1.9rem;
     font-weight: 600;
     color: #2c3e50;
-    margin-bottom: 25px;
 }
 
 .form-label {
@@ -37,12 +36,6 @@ h1 {
     box-shadow: 0 0 0 2px rgba(59, 125, 221, 0.25);
 }
 
-textarea.form-control {
-    min-height: 130px;
-    resize: vertical;
-}
-
-
 .btn-primary {
     background-color: #3b7ddd;
     border-color: #3b7ddd;
@@ -53,7 +46,6 @@ textarea.form-control {
 
 .btn-primary:hover {
     background-color: #346fcc;
-    border-color: #346fcc;
 }
 
 .btn-secondary {
@@ -65,10 +57,10 @@ textarea.form-control {
 @media (max-width: 768px) {
     .container {
         padding: 20px;
-        margin-top: 15px;
+        margin-top: 20px;
     }
 
-    h1 {
+    h2 {
         font-size: 1.6rem;
     }
 }

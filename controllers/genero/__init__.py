@@ -38,7 +38,7 @@ def add_genero():
 def view_generos():
     with ENGINE.begin() as conn:
         generos = conn.execute(text(
-            """SELECT Nome_genero FROM Generos;"""
+            """SELECT ID_genero, Nome_genero FROM Generos;"""
         )).mappings().fetchall()
     return render_template('view_generos.html', generos=generos)
 

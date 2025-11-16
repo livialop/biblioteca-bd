@@ -2,15 +2,16 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Empréstimos</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style/view_emprestimos.css') }}">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 
   {% include "components/navbar_add.html" %}
-
+  {% include "components/navbar_view.html" %}
   <div class="p-4 container">
+    {% include "components/flash.html" %}
     <h1>Empréstimos</h1>
 
     <a class="btn btn-primary mb-3" href="{{ url_for('emprestimo.add_emprestimo') }}">Novo Empréstimo</a>
@@ -23,16 +24,23 @@
             <th>Usuário</th>
             <th>Data Empréstimo</th>
             <th>Data Devolução Prevista</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody>
           {% for emp in emprestimos %}
           <tr>
-            <td>{{ emp.livro.titulo }}</td>
-            <td>{{ emp.usuario.nome }}</td>
+            <td>{{ emp.Titulo }}</td>
+            <td>{{ emp.Nome_usuario }}</td>
             <td>{{ emp.Data_emprestimo }}</td>
             <td>{{ emp.Data_devolucao_prevista or '—' }}</td>
-          </tr>
+            <td>
+              <a class="btn btn-sm btn-secondary" href="{{ url_for('emprestimo.update_emprestimo', emprestimo_id=emp.ID_emprestimo) }}">Atualizar</a>           
+              <form action="{{ url_for('emprestimo.delete_emprestimo', emprestimo_id=emp.ID_emprestimo) }}" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+              </form>
+            </td>
+            </tr>
           {% endfor %}
         </tbody>
       </table>

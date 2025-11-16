@@ -1,24 +1,128 @@
+
 body {
-  background-color: #fdfdfd;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f3f4f6; 
+    color: #333;
 }
 
-h1 {
-  color: #28a745;
-  margin-bottom: 20px;
+
+body > *:not(nav) {
+    margin-top: 80px; 
 }
 
-form .form-label {
-  font-weight: bold;
+
+a {
+    text-decoration: none;
+    color: #0d6efd;
 }
 
-form .form-control {
-  border-radius: 6px;
+a:hover {
+    text-decoration: underline;
 }
 
-.btn-success {
-  background-color: #28a745;
+h1, h2, h3 {
+    color: #333;
+    font-weight: 600;
 }
 
-.btn-secondary {
-  margin-left: 10px;
+form {
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: 0.2s ease-in-out;
+}
+
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 6px rgba(13, 110, 253, 0.3);
+    outline: none;
+}
+
+button,
+.btn {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+button.btn-primary,
+.btn.btn-primary {
+    background-color: #0d6efd;
+    color: #fff;
+}
+
+button.btn-primary:hover,
+.btn.btn-primary:hover {
+    background-color: #0b5ed7;
+}
+
+button.btn-secondary,
+.btn.btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+button.btn-secondary:hover,
+.btn.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+
+table {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th {
+    background: #0d6efd;
+    color: white !important;
+    text-align: center;
+}
+
+td {
+    vertical-align: middle;
+}
+
+
+nav {
+    background-color: #0d6efd;
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 1000;
+}
+
+nav a {
+    color: white;
+    font-weight: 500;
+    transition: 0.2s ease;
+}
+
+nav a:hover {
+    color: #dce9ff;
 }
