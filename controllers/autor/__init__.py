@@ -54,12 +54,16 @@ def view_autores():
 @login_required
 def delete_autor(autor_id):
     with ENGINE.begin() as conn:
-        conn.execute(text(
-            """DELETE FROM Autores WHERE ID_autor = :autor_id;"""
-        ), {
-            'autor_id': autor_id
-        })
-    
+        try: 
+            conn.execute(text(
+                """DELETE FROM Autores WHERE ID_autor = :autor_id;"""
+            ), {
+                'autor_id': autor_id
+            })
+        except Exception as e:
+            flash('Erro: Não foi possível deletar o autor. Verifique se há livros associados.', category='error')
+            return redirect(url_for('autor.view_autores'))
+
     flash('Autor deletado.', category='success')
     return redirect(url_for('autor.add_autor'))
 

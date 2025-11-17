@@ -106,11 +106,15 @@ def view_emprestimos():
 @login_required
 def delete_emprestimo(emprestimo_id):
     with ENGINE.begin() as conn:
-        conn.execute(text(
-            """DELETE FROM Emprestimos WHERE ID_emprestimo = :emprestimo_id"""
-        ), {
-            'emprestimo_id': emprestimo_id
-        })
+        try:
+            conn.execute(text(
+                """DELETE FROM Emprestimos WHERE ID_emprestimo = :emprestimo_id"""
+            ), {
+                'emprestimo_id': emprestimo_id
+            })
+        except Exception as e:
+            flash('Erro: Não foi possível deletar o empréstimo.', category='error')
+            return redirect(url_for('emprestimo.view_emprestimos'))
 
     flash('Empréstimo deletado com sucesso.', category='success')
     return redirect(url_for('emprestimo.view_emprestimos'))

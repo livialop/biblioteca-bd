@@ -48,12 +48,16 @@ def view_editoras():
 @login_required
 def delete_editora(editora_id):
     with ENGINE.begin() as conn:
-        conn.execute(text(
-            """DELETE FROM Editoras WHERE ID_editora = :editora_id;"""
-        ), {
-            'editora_id': editora_id
-        })
-    
+        try: 
+            conn.execute(text(
+                """DELETE FROM Editoras WHERE ID_editora = :editora_id;"""
+            ), {
+                'editora_id': editora_id
+            })
+        except Exception as e:
+            flash('Erro: Não foi possível deletar a editora. Verifique se há livros associados.', category='error')
+            return redirect(url_for('editora.view_editoras'))
+
     flash('Editora deletada.', category='success')
     return redirect(url_for('editora.add_editora'))
 

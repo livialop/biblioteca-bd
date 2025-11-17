@@ -47,11 +47,16 @@ def view_generos():
 @login_required
 def delete_genero(genero_id):
     with ENGINE.connect() as conn:
-        conn.execute(text(
-            """DELETE FROM Generos WHERE ID_genero = :genero_id;"""
-        ), {
-            'genero_id': genero_id
-        })
+        try:
+            conn.execute(text(
+                """DELETE FROM Generos WHERE ID_genero = :genero_id;"""
+            ), {
+                'genero_id': genero_id
+            })
+
+        except Exception as e:
+            flash('Erro: Não foi possível deletar o gênero. Verifique se há livros associados.', category='error')
+            return redirect(url_for('genero.view_generos'))
 
     flash('Gênero deletado com sucesso!', category='success')
     return redirect(url_for('genero.view_generos'))

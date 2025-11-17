@@ -67,11 +67,18 @@ def view_livros():
 @livros_bp.route('/delete_livro/<int:livro_id>', methods=['POST'])
 @login_required
 def delete_livro(livro_id):
+    
     query_delete = text(f"DELETE FROM Livros WHERE ID_livro = :livro_id;")
     with ENGINE.connect() as conn:
-        conn.execute(query_delete, {"livro_id": livro_id})
-        conn.commit()
-    
+        try:
+            conn.execute(query_delete, {"livro_id": livro_id})
+            conn.commit()
+        except Exception as e:
+            flash('Erro: Não foi possível deletar o livro. Verifique se há empréstimos associados.', category='error')
+            return redirect(url_for('livros.view_livros'))
+        finally:
+            conn.close()
+
     flash('Livro deletado com sucesso!', category='success')
     return redirect(url_for('livros.view_livros'))
 
