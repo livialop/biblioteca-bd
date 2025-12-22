@@ -203,3 +203,65 @@ BEGIN
 END;
 //
 DELIMITER ;
+
+-- Exemplos 3 (AUTOMAÇÃO):
+    -- Ajustar dados de outras tabelas automaticamente.
+    -- Refletir ações que desencadeiam mudanças em cascata.
+    -- Manter integridade lógica após operações.
+    -- Alterar situação do aluno para “inativo” quando todas as matrículas forem canceladas.
+    -- Ajustar carga horária total de um curso quando uma disciplina é criada ou removida.
+    -- Remover notas automaticamente ao cancelar uma matrícula.
+
+DELIMITER //
+CREATE TRIGGER aluno_inativo
+AFTER DELETE
+ON Matriculas
+FOR EACH ROW
+BEGIN
+    UPDATE Alunos
+    SET Situacao = 'inativo'
+    WHERE Id_aluno = OLD.Id_aluno;
+END;
+//
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER soma_carga_curso
+AFTER INSERT
+ON Disciplinas
+FOR EACH ROW
+BEGIN
+    UPDATE Cursos
+    SET Carga_horaria_total = Carga_horaria_total + NEW.Carga_horaria
+    WHERE Id_curso = NEW.Id_curso;
+END;
+//
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER subtrai_carga_curso
+AFTER DELETE
+ON Disciplinas
+FOR EACH ROW
+BEGIN
+    UPDATE Cursos
+    SET Carga_horaria_total = Carga_horaria_total - OLD.Carga_horaria
+    WHERE Id_curso = OLD.Id_curso;
+END;
+//
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER remover_notas
+AFTER UPDATE
+ON Matriculas
+FOR EACH ROW
+BEGIN
+    IF NEW.Status = 'cancelada' THEN
+        DELETE FROM Notas
+        WHERE Id_matricula = NEW.Id_matricula;
+    END IF;
+END;
+//
+DELIMITER ;
+
