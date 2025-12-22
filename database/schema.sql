@@ -58,6 +58,31 @@ CREATE TABLE IF NOT EXISTS Emprestimos (
     FOREIGN KEY (Livro_id) REFERENCES Livros(ID_livro)
 );
 
+-- CREATE AUDITORIA
+
+CREATE TABLE IF NOT EXISTS Logs_usuarios (
+    ID_log INT AUTO_INCREMENT PRIMARY KEY,
+    ID_usuario INT,
+    Acao VARCHAR(100),
+    Data_hora DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS Logs_emprestimos (
+    ID_log INT AUTO_INCREMENT PRIMARY KEY,
+    ID_emprestimo INT,
+    Status_antigo ENUM('pendente', 'devolvido', 'atrasado'),
+    Status_novo ENUM('pendente', 'devolvido', 'atrasado'),
+    Data_hora DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS Logs_livros (
+    ID_log INT AUTO_INCREMENT PRIMARY KEY,
+    ID_livro INT,
+    Titulo VARCHAR(255),
+    Acao VARCHAR(100),
+    Data_hora DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 -- TRIGGERS
     -- Exemplos 1 (VALIDAÇÃO):
     --Bloquear valores inválidos.
@@ -136,6 +161,45 @@ BEGIN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Nome de usuário repetido.'
     END IF;
+END;
+//
+DELIMITER ;
+
+-- TIGGERS AUDITORIA
+
+DELIMITER //
+CREATE TRIGGER auditoria_usuario_insert
+AFTER INSERT ON Usuarios
+FOR EACH ROW
+BEGIN
+    INSERT INTO Logs_usuarios (ID_usuario, Acao)
+    VALUES (NEW.ID_usuario, 'Novo usuário cadastrado');
+END;
+//
+DELIMITER ;
+
+
+DELIMITER //
+CREATE TRIGGER auditoria_status_emprestimo
+AFTER UPDATE ON Emprestimos
+FOR EACH ROW
+BEGIN
+    IF OLD.Status_emprestimo <> NEW.Status_emprestimo THEN
+        INSERT INTO Logs_emprestimos (ID_emprestimo, Status_antigo, Status_novo)
+        VALUES (OLD.ID_emprestimo, OLD.Status_emprestimo, NEW.Status_emprestimo);
+    END IF;
+END;
+//
+DELIMITER ;
+
+
+DELIMITER //
+CREATE TRIGGER auditoria_livro_delete
+BEFORE DELETE ON Livros
+FOR EACH ROW
+BEGIN
+    INSERT INTO Logs_livros (ID_livro, Titulo, Acao)
+    VALUES (OLD.ID_livro, OLD.Titulo, 'Livro removido do acervo');
 END;
 //
 DELIMITER ;
