@@ -57,3 +57,85 @@ CREATE TABLE IF NOT EXISTS Emprestimos (
     FOREIGN KEY (Usuario_id) REFERENCES Usuarios(ID_usuario),
     FOREIGN KEY (Livro_id) REFERENCES Livros(ID_livro)
 );
+
+-- TRIGGERS
+    -- Exemplos 1 (VALIDAÇÃO):
+    --Bloquear valores inválidos.
+    --Garantir regras de negócio obrigatórias.
+    --Impedir registros duplicados.
+    --Verificar dependências antes de permitir alterações.
+    --Impedir matrícula duplicada na mesma disciplina.
+    --Bloquear nota fora do intervalo 0 a 10.
+    --Impedir matrícula quando o aluno estiver inativo.
+
+
+DELIMITER //
+CREATE TRIGGER quantidade_livro_invalida BEFORE INSERT 
+ON Livros
+FOR EACH ROW 
+BEGIN 
+    IF NEW.Quantidade_disponivel <= 0 THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Quantidade de livros deve ser maior que zero.';
+    END IF;
+END;
+//
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER data_nascimento_autor BEFORE INSERT
+ON Autores
+FOR EACH ROW
+BEGIN
+    IF NEW.Data_nascimento > CURDATE() THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Data de nascimento não pode ser no futuro.';
+    END IF;
+END;
+//
+DELIMITER ;
+
+DELIMITER // 
+CREATE TRIGGER genero_repetido BEFORE INSERT
+ON Generos
+FOR EACH ROW
+BEGIN 
+    IF NEW.Nome_genero IN (
+        SELECT Nome_genero FROM Generos
+    ) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Gênero repetido.'
+    END IF;
+END;
+//
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER editora_repetida BEFORE INSERT
+ON Editoras
+FOR EACH ROW
+BEGIN
+    IF NEW.Nome_editora IN (
+        SELECT Nome_editora FROM Editoras
+    ) THEN 
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Editora repetida.'
+    END IF;
+END;
+//
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER nome_usuario_repetido BEFORE INSERT
+ON Usuarios
+FOR EACH ROW
+BEGIN
+    IF NEW.Nome_usuario IN (
+        SELECT Nome_usuario FROM Usuarios
+    ) THEN 
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Nome de usuário repetido.'
+    END IF;
+END;
+//
+DELIMITER ;
