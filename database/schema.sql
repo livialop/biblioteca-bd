@@ -203,3 +203,42 @@ BEGIN
 END;
 //
 DELIMITER ;
+
+-- Geração automática de valores
+
+DELIMITER //
+CREATE TRIGGER gerar_data_emprestimo
+BEFORE INSERT ON Emprestimos
+FOR EACH ROW
+BEGIN
+    IF NEW.Data_emprestimo IS NULL THEN
+        SET NEW.Data_emprestimo = CURDATE();
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- 2. Definir status padrão do empréstimo
+DELIMITER //
+CREATE TRIGGER status_padrao_emprestimo
+BEFORE INSERT ON Emprestimos
+FOR EACH ROW
+BEGIN
+    IF NEW.Status_emprestimo IS NULL THEN
+        SET NEW.Status_emprestimo = 'pendente';
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- 3. Gerar descrição automática na auditoria ao remover um livro
+DELIMITER //
+CREATE TRIGGER gerar_log_remocao_livro
+BEFORE DELETE ON Livros
+FOR EACH ROW
+BEGIN
+    INSERT INTO Logs_livros (ID_livro, Titulo, Acao)
+    VALUES (OLD.ID_livro, OLD.Titulo, 'Livro removido do acervo');
+END;
+//
+DELIMITER ;
