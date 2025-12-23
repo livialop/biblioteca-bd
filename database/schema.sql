@@ -242,3 +242,31 @@ BEGIN
 END;
 //
 DELIMITER ;
+
+-- Atualizar quantidade de livros ao registrar um empréstimo
+DELIMITER //
+
+CREATE TRIGGER diminuir_livro_emprestimo
+AFTER INSERT ON Emprestimos
+FOR EACH ROW
+BEGIN
+    UPDATE Livros
+    SET Quantidade_disponivel = Quantidade_disponivel - 1
+    WHERE ID_livro = NEW.Livro_id;
+END;
+//
+DELIMITER;
+
+-- Remover empréstimos ao excluir um livro
+DELIMITER //
+
+CREATE TRIGGER excluir_emprestimos_livro
+AFTER DELETE ON Livros
+FOR EACH ROW
+BEGIN
+    DELETE FROM Emprestimos
+    WHERE Livro_id = OLD.ID_livro;
+END;
+//
+DELIMITER ;
+
