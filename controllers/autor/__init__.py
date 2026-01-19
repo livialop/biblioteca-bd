@@ -1,4 +1,5 @@
 from flask import render_template, redirect, url_for, request, Blueprint, flash
+from datetime import date, datetime
 from flask_login import login_required
 from sqlalchemy import text
 from config import ENGINE
@@ -13,6 +14,16 @@ def add_autor():
         nacionalidade = request.form.get('nacionalidade')
         data_nascimento = request.form.get('data_nascimento')
         biografia = request.form.get('biografia')
+
+        if data_nascimento:
+            try:
+                data_nascimento_date = datetime.strptime(data_nascimento, "%Y-%m-%d").date()
+                if data_nascimento_date > date.today():
+                    flash('Data de nascimento não pode ser no futuro.', 'danger')
+                    return redirect(url_for('autor.add_autor'))
+            except ValueError:
+                flash('Data de nascimento inválida.', 'danger')
+                return redirect(url_for('autor.add_autor'))
 
         try:
             with ENGINE.begin() as conn:

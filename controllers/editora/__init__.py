@@ -14,6 +14,16 @@ def add_editora():
 
         try:
             with ENGINE.begin() as conn:
+                editora_existe = conn.execute(text(
+                    """SELECT 1 FROM Editoras WHERE Nome_editora = :nome_editora"""
+                ), {
+                    'nome_editora': nome_editora
+                }).scalar()
+
+                if editora_existe:
+                    flash('Editora repetida.', category='danger')
+                    return redirect(url_for('editora.add_editora'))
+
                 conn.execute(text("""
                     INSERT INTO Editoras 
                     (Nome_editora, Endereco_editora)

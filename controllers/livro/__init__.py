@@ -20,6 +20,15 @@ def add_livro():
         quantidade = request.form.get('quantidade')
         resumo = request.form.get('resumo')
 
+        try:
+            quantidade_int = int(quantidade)
+            if quantidade_int <= 0:
+                flash('Quantidade de livros deve ser maior que zero.', 'danger')
+                return redirect(url_for('livros.add_livro'))
+        except (TypeError, ValueError):
+            flash('Quantidade inválida.', 'danger')
+            return redirect(url_for('livros.add_livro'))
+
         with ENGINE.begin() as conn:
             conn.execute(text("""
                 INSERT INTO Livros 
@@ -32,7 +41,7 @@ def add_livro():
                 "ano": ano,
                 "genero_id": genero_id,
                 "editora_id": editora_id,
-                "quantidade": quantidade,
+                "quantidade": quantidade_int,
                 "resumo": resumo
             })
 
@@ -98,6 +107,15 @@ def update_livro(livro_id):
         quantidade: int = request.form.get('quantidade')
         resumo: str = request.form.get('resumo')
 
+        try:
+            quantidade_int = int(quantidade)
+            if quantidade_int <= 0:
+                flash('Quantidade de livros deve ser maior que zero.', 'danger')
+                return redirect(url_for('livros.update_livro', livro_id=livro_id))
+        except (TypeError, ValueError):
+            flash('Quantidade inválida.', 'danger')
+            return redirect(url_for('livros.update_livro', livro_id=livro_id))
+
         query_update = text(f"""
             UPDATE Livros
             SET Titulo = :titulo,
@@ -119,7 +137,7 @@ def update_livro(livro_id):
                 "ano_publicacao": ano_publicacao,
                 "genero": genero,
                 "editora": editora,
-                "quantidade": quantidade,
+                "quantidade": quantidade_int,
                 "resumo": resumo,
                 "livro_id": livro_id
             })

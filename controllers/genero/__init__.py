@@ -13,14 +13,24 @@ def add_genero():
 
         try:
             with ENGINE.begin() as conn:
+                genero_existe = conn.execute(text(
+                    """SELECT 1 FROM Generos WHERE Nome_genero = :nome_genero"""
+                ), {
+                    'nome_genero': nome_genero
+                }).scalar()
+
+                if genero_existe:
+                    flash('Gênero repetido.', category='danger')
+                    return redirect(url_for('genero.add_genero'))
+
                 conn.execute(text(
                     """INSERT INTO Generos
                         (Nome_genero)
                         VALUES (:nome_genero)
                     """
                 ), {
-                'nome_genero': nome_genero
-            })
+                    'nome_genero': nome_genero
+                })
             
             flash(f"Gênero '{nome_genero}' adicionado com sucesso.", category='success')
             return redirect(url_for('livros.add_livro'))

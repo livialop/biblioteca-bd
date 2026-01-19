@@ -14,7 +14,7 @@ def add_emprestimo():
         data_emprestimo = request.form.get('data_emprestimo') or None
         data_devolucao_prevista = request.form.get('data_devolucao_prevista') or None
         data_devolucao_real = request.form.get('data_devolucao_real') or None
-        status_emprestimo = request.form.get('status_emprestimo')
+        status_emprestimo = request.form.get('status_emprestimo') or None
 
         try:
             with ENGINE.begin() as conn:
@@ -51,10 +51,10 @@ def add_emprestimo():
                     flash("Livro indisponível para empréstimo.", "danger")
                     return redirect(url_for("emprestimo.add_emprestimo"))
                 
-                conn.execute(text("""
+                result = conn.execute(text("""
                     INSERT INTO Emprestimos
                     (Usuario_id, Livro_id, Data_emprestimo, Data_devolucao_prevista, Data_devolucao_real, Status_emprestimo)
-                    VALUES (:usuario_id, :livro_id, COALESCE(:data_emprestimo, CURRENT_DATE()), COALESCE(:data_devolucao_prevista, CURRENT_DATE + INTERVAL 30 DAY), :data_devolucao_real, :status_emprestimo)
+                    VALUES (:usuario_id, :livro_id, :data_emprestimo, COALESCE(:data_devolucao_prevista, CURRENT_DATE + INTERVAL 30 DAY), :data_devolucao_real, :status_emprestimo)
                 """), {
                     'usuario_id': usuario_id,
                     'livro_id': livro_id,
@@ -64,15 +64,32 @@ def add_emprestimo():
                     'status_emprestimo': status_emprestimo
                 })
 
-                flash('Empréstimo adicionado com sucesso!', category='success')
+                emprestimo_id = result.lastrowid
+                if emprestimo_id:
+                    emprestimo = conn.execute(text("""
+                        SELECT Data_emprestimo, Status_emprestimo
+                        FROM Emprestimos
+                        WHERE ID_emprestimo = :emprestimo_id
+                    """), {
+                        'emprestimo_id': emprestimo_id
+                    }).mappings().fetchone()
 
-                conn.execute(text("UPDATE Livros SET Quantidade_disponivel = Quantidade_disponivel - 1 WHERE ID_livro = :livro_id;"),
-                                    {'livro_id': livro_id})
+                    if emprestimo:
+                        if data_emprestimo is None and emprestimo.get('Data_emprestimo'):
+                            flash('Data do empréstimo foi definida automaticamente.', 'info')
+                        if status_emprestimo is None and emprestimo.get('Status_emprestimo'):
+                            flash(f"Status do empréstimo definido automaticamente como '{emprestimo.get('Status_emprestimo')}'.", 'info')
+
+                flash('Empréstimo adicionado com sucesso!', category='success')
             
             return redirect(url_for('emprestimo.view_emprestimos'))
         
         except Exception as e:
-            flash(f'Erro {e}', category='danger')
+            mensagem_erro = str(e)
+            if '45000' in mensagem_erro:
+                flash(f'Erro: {mensagem_erro}', category='danger')
+            else:
+                flash(f'Erro: {mensagem_erro}', category='danger')
             return redirect(url_for('emprestimo.add_emprestimo'))
     
 

@@ -15,11 +15,17 @@ def register():
         senha: str = request.form.get('senha')
 
         query_user_existe = text("SELECT * FROM Usuarios WHERE Email = :email")
+        query_nome_existe = text("SELECT 1 FROM Usuarios WHERE Nome_usuario = :nome")
         with ENGINE.connect() as conn:
             user_existe = conn.execute(query_user_existe, {'email': email}).fetchone()
             if user_existe:
                 flash('Email já cadastrado!', category='error')
                 return redirect(url_for('auth.login'))
+
+            nome_existe = conn.execute(query_nome_existe, {'nome': nome}).scalar()
+            if nome_existe:
+                flash('Nome de usuário repetido.', category='error')
+                return redirect(url_for('auth.register'))
 
             senha_hash = generate_password_hash(senha)
 
@@ -59,7 +65,7 @@ def register():
 def login():
     if request.method == 'POST':
         email: str = request.form.get('email')
-        senha: str = request.form.get('senha')
+        senha: str  = request.form.get('senha')
 
         query = text("SELECT * FROM Usuarios WHERE Email = :email")
         with ENGINE.connect() as conn:
