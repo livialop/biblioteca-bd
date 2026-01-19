@@ -84,14 +84,14 @@ CREATE TABLE IF NOT EXISTS Logs_livros (
 );
 
 -- TRIGGERS
-    -- Exemplos 1 (VALIDAÇÃO):
-    --Bloquear valores inválidos.
-    --Garantir regras de negócio obrigatórias.
-    --Impedir registros duplicados.
-    --Verificar dependências antes de permitir alterações.
-    --Impedir matrícula duplicada na mesma disciplina.
-    --Bloquear nota fora do intervalo 0 a 10.
-    --Impedir matrícula quando o aluno estiver inativo.
+    -- Exemplos 1 (VALIDACAO):
+    -- Bloquear valores invalidos.
+    -- Garantir regras de negocio obrigatorias.
+    -- Impedir registros duplicados.
+    -- Verificar dependencias antes de permitir alteracoes.
+    -- Impedir matricula duplicada na mesma disciplina.
+    -- Bloquear nota fora do intervalo 0 a 10.
+    -- Impedir matricula quando o aluno estiver inativo.
 
 
 DELIMITER //
@@ -206,6 +206,19 @@ DELIMITER ;
 
 -- Geração automática de valores
 
+-- Auditoria: registrar inserção de livro
+DELIMITER //
+CREATE TRIGGER auditoria_livro_insert
+AFTER INSERT ON Livros
+FOR EACH ROW
+BEGIN
+    INSERT INTO Logs_livros (ID_livro, Titulo, Acao)
+    VALUES (NEW.ID_livro, NEW.Titulo, 'Livro adicionado ao acervo');
+END;
+//
+DELIMITER ;
+
+
 DELIMITER //
 CREATE TRIGGER gerar_data_emprestimo
 BEFORE INSERT ON Emprestimos
@@ -243,7 +256,7 @@ END;
 //
 DELIMITER ;
 
--- Atualizar quantidade de livros ao registrar um empréstimo
+-- Atualizar quantidade de livros ao registrar um emprestimo
 DELIMITER //
 
 CREATE TRIGGER diminuir_livro_emprestimo
@@ -257,7 +270,7 @@ END;
 //
 DELIMITER;
 
--- Remover empréstimos ao excluir um livro
+-- Remover emprestimos ao excluir um livro
 DELIMITER //
 
 CREATE TRIGGER excluir_emprestimos_livro
