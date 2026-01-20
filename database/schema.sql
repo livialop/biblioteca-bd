@@ -204,9 +204,7 @@ END;
 //
 DELIMITER ;
 
--- Geração automática de valores
 
--- Auditoria: registrar inserção de livro
 DELIMITER //
 CREATE TRIGGER auditoria_livro_insert
 AFTER INSERT ON Livros
@@ -218,6 +216,7 @@ END;
 //
 DELIMITER ;
 
+-- GERAÇÃO DE VALORES
 
 DELIMITER //
 CREATE TRIGGER gerar_data_emprestimo
@@ -255,6 +254,8 @@ BEGIN
 END;
 //
 DELIMITER ;
+
+-- AUTOMAÇÃO
 
 -- Atualizar quantidade de livros ao registrar um emprestimo
 DELIMITER //
