@@ -219,6 +219,7 @@ END;
 //
 DELIMITER ;
 
+-- GERAÇÃO DE VALORES
 
 -- Geração automática de valores
 
@@ -260,6 +261,8 @@ BEGIN
 END;
 //
 DELIMITER ;
+
+-- AUTOMAÇÃO
 
 -- Atualizar quantidade de livros ao registrar um emprestimo
 DELIMITER //
