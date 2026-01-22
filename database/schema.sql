@@ -83,15 +83,16 @@ CREATE TABLE IF NOT EXISTS Logs_livros (
     Data_hora DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- TRIGGERS
-    -- Exemplos 1 (VALIDACAO):
-    -- Bloquear valores invalidos.
-    -- Garantir regras de negocio obrigatorias.
-    -- Impedir registros duplicados.
-    -- Verificar dependencias antes de permitir alteracoes.
-    -- Impedir matricula duplicada na mesma disciplina.
-    -- Bloquear nota fora do intervalo 0 a 10.
-    -- Impedir matricula quando o aluno estiver inativo.
+
+CREATE TABLE IF NOT EXISTS Logs_quantidade_livros (
+    ID_log INT AUTO_INCREMENT PRIMARY KEY,
+    ID_livro INT,
+    Quantidade_antiga INT,
+    Quantidade_nova INT,
+    Acao VARCHAR(100),
+    Data_hora DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
 
 
 DELIMITER //
@@ -204,19 +205,23 @@ END;
 //
 DELIMITER ;
 
--- Geração automática de valores
 
--- Auditoria: registrar inserção de livro
 DELIMITER //
-CREATE TRIGGER auditoria_livro_insert
-AFTER INSERT ON Livros
+CREATE TRIGGER auditoria_quantidade_livro_update
+AFTER UPDATE ON Livros
 FOR EACH ROW
 BEGIN
-    INSERT INTO Logs_livros (ID_livro, Titulo, Acao)
-    VALUES (NEW.ID_livro, NEW.Titulo, 'Livro adicionado ao acervo');
+    IF OLD.Quantidade_disponivel <> NEW.Quantidade_disponivel THEN
+        INSERT INTO Logs_quantidade_livros (ID_livro, Quantidade_antiga, Quantidade_nova, Acao)
+        VALUES (OLD.ID_livro, OLD.Quantidade_disponivel, NEW.Quantidade_disponivel, 'Quantidade de livros atualizada');
+    END IF;
 END;
 //
 DELIMITER ;
+
+
+-- Geração automática de valores
+
 
 
 DELIMITER //
@@ -282,4 +287,3 @@ BEGIN
 END;
 //
 DELIMITER ;
-
