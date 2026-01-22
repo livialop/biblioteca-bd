@@ -93,6 +93,14 @@ CREATE TABLE IF NOT EXISTS Logs_quantidade_livros (
     Data_hora DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE auditoria_autores_update (
+    ID_log INT AUTO_INCREMENT PRIMARY KEY,
+    ID_autor INT NOT NULL,
+    Campo_alterado VARCHAR(50),
+    Valor_antigo TEXT,
+    Valor_novo TEXT,
+    Data_hora DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 
 
 DELIMITER //
@@ -179,6 +187,8 @@ END;
 //
 DELIMITER ;
 
+SELECT * FROM Logs_usuarios ORDER BY ID_log DESC;
+
 
 DELIMITER //
 CREATE TRIGGER auditoria_status_emprestimo
@@ -193,6 +203,8 @@ END;
 //
 DELIMITER ;
 
+SELECT * FROM Logs_emprestimos ORDER BY ID_log DESC;
+
 
 DELIMITER //
 CREATE TRIGGER auditoria_livro_delete
@@ -204,6 +216,8 @@ BEGIN
 END;
 //
 DELIMITER ;
+
+SELECT * FROM Logs_livros ORDER BY ID_log DESC;
 
 
 DELIMITER //
@@ -218,6 +232,45 @@ BEGIN
 END;
 //
 DELIMITER ;
+
+SELECT * FROM Logs_quantidade_livros ORDER BY ID_log DESC;
+
+DELIMITER //
+
+CREATE TRIGGER auditoria_autor_update
+AFTER UPDATE ON Autores
+FOR EACH ROW
+BEGIN
+    -- Nome
+    IF OLD.Nome_autor <> NEW.Nome_autor THEN
+        INSERT INTO auditoria_autores_update (ID_autor, Campo_alterado, Valor_antigo, Valor_novo)
+        VALUES (OLD.ID_autor, 'Nome_autor', OLD.Nome_autor, NEW.Nome_autor);
+    END IF;
+
+    -- Nacionalidade
+    IF OLD.Nacionalidade <> NEW.Nacionalidade THEN
+        INSERT INTO auditoria_autores_update (ID_autor, Campo_alterado, Valor_antigo, Valor_novo)
+        VALUES (OLD.ID_autor, 'Nacionalidade', OLD.Nacionalidade, NEW.Nacionalidade);
+    END IF;
+
+    -- Data Nascimento
+    IF OLD.Data_nascimento <> NEW.Data_nascimento THEN
+        INSERT INTO auditoria_autores_update (ID_autor, Campo_alterado, Valor_antigo, Valor_novo)
+        VALUES (OLD.ID_autor, 'Data_nascimento', OLD.Data_nascimento, NEW.Data_nascimento);
+    END IF;
+
+    -- Biografia
+    IF OLD.Biografia <> NEW.Biografia THEN
+        INSERT INTO auditoria_autores_update (ID_autor, Campo_alterado, Valor_antigo, Valor_novo)
+        VALUES (OLD.ID_autor, 'Biografia', OLD.Biografia, NEW.Biografia);
+    END IF;
+END;
+//
+
+DELIMITER ;
+
+SELECT * FROM auditoria_autores_update ORDER BY ID_log DESC;
+
 
 -- GERAÇÃO DE VALORES
 
