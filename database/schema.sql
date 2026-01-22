@@ -275,15 +275,21 @@ END;
 //
 DELIMITER;
 
--- Remover emprestimos ao excluir um livro
+-- Aumentar a quantidade disponível ao devolver um livro
 DELIMITER //
 
-CREATE TRIGGER excluir_emprestimos_livro
-AFTER DELETE ON Livros
+CREATE TRIGGER aumentar_livro_devolucao
+AFTER UPDATE ON Emprestimos
 FOR EACH ROW
 BEGIN
-    DELETE FROM Emprestimos
-    WHERE Livro_id = OLD.ID_livro;
+    IF OLD.Status_emprestimo <> 'devolvido'
+       AND NEW.Status_emprestimo = 'devolvido' THEN
+
+        UPDATE Livros
+        SET Quantidade_disponivel = Quantidade_disponivel + 1
+        WHERE ID_livro = NEW.Livro_id;
+
+    END IF;
 END;
 //
 DELIMITER ;
