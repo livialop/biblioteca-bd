@@ -99,7 +99,8 @@ def update_autor(autor_id):
                 'nome_autor': nome_autor,
                 'nacionalidade': nacionalidade,
                 'data_nascimento': data_nascimento,
-                'biografia': biografia
+                'biografia': biografia,
+                'autor_id': autor_id,  # Added autor_id here
             })
 
             flash('Livro atualizado com sucesso.', category='success')
