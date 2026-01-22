@@ -219,6 +219,31 @@ END;
 //
 DELIMITER ;
 
+DELIMITER //
+
+CREATE TRIGGER bloquear_emprestimo_usuario_inadimplente
+BEFORE INSERT ON Emprestimos
+FOR EACH ROW
+BEGIN
+    DECLARE total_multas DECIMAL(10,2);
+
+    SELECT SUM(Multa)
+    INTO total_multas
+    FROM Emprestimos
+    WHERE ID_usuario = NEW.ID_usuario
+      AND Multa > 0
+      AND Status_emprestimo <> 'PAGO';
+
+    IF total_multas IS NOT NULL AND total_multas > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Usuário possui multa pendente e não pode realizar novo empréstimo';
+    END IF;
+END;
+//
+
+DELIMITER ;
+
+
 -- GERAÇÃO DE VALORES
 
 -- Geração automática de valores
