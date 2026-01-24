@@ -70,7 +70,6 @@ def login():
         query = text("SELECT * FROM Usuarios WHERE Email = :email")
         with ENGINE.connect() as conn:
             user_existe = conn.execute(query, {'email': email}).mappings().fetchone() # mappings serve p transformar em dicionario
-            print(user_existe)
             if user_existe and check_password_hash(user_existe['senha'], senha):
                 user_obj = Usuario(
                     id_usuario=user_existe['ID_usuario'],

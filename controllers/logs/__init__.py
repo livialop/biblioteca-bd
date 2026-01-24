@@ -30,9 +30,25 @@ def view_logs():
             LIMIT 200;
         """)).mappings().fetchall()
 
+        logs_quantidade_livros = conn.execute(text("""
+            SELECT ID_log, ID_livro, Quantidade_antiga, Quantidade_nova, Acao, Data_hora
+            FROM Logs_quantidade_livros
+            ORDER BY Data_hora DESC
+            LIMIT 200;
+        """)).mappings().fetchall()
+
+        logs_autor = conn.execute(text("""
+            SELECT ID_log, ID_autor, Campo_alterado, Valor_antigo, Valor_novo, Data_hora
+            FROM Logs_autor
+            ORDER BY Data_hora DESC
+            LIMIT 200;
+        """)).mappings().fetchall()
+
     return render_template(
         'view_logs.html',
         logs_usuarios=logs_usuarios,
         logs_emprestimos=logs_emprestimos,
-        logs_livros=logs_livros
+        logs_livros=logs_livros,
+        logs_quantidade_livros=logs_quantidade_livros,
+        logs_autor=logs_autor
     )

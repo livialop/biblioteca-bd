@@ -107,6 +107,73 @@
         </table>
       </div>
     </div>
+
+    <div class="mb-5">
+      <h2 class="h4">Quantidade de Livros</h2>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>ID Log</th>
+              <th>ID Livro</th>
+              <th>Quantidade Antiga</th>
+              <th>Quantidade Nova</th>
+              <th>Ação</th>
+              <th>Data/Hora</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in logs_quantidade_livros %}
+              <tr>
+                <td>{{ log.ID_log }}</td>
+                <td>{{ log.ID_livro }}</td>
+                <td>{{ log.Quantidade_antiga }}</td>
+                <td>{{ log.Quantidade_nova }}</td>
+                <td>{{ log.Acao }}</td>
+                <td>{{ log.Data_hora }}</td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="6" class="text-center">Sem logs de quantidade de livros.</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mb-5">
+        <h2 class="h4">Autores</h2>
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>ID Log</th>
+                <th>ID Autor</th>
+                <th>Campo Alterado</th>
+                <th>Valor Antigo</th>
+                <th>Valor Novo</th>
+                <th>Data/Hora</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for log in logs_autor %}
+                <tr>
+                  <td>{{ log.ID_log }}</td>
+                  <td>{{ log.ID_autor }}</td>
+                  <td>{{ log.Campo_alterado }}</td>
+                  <td>{{ log.Valor_antigo }}</td>
+                  <td>{{ log.Valor_novo }}</td>
+                  <td>{{ log.Data_hora }}</td>
+                </tr>
+              {% else %}
+                <tr>
+                  <td colspan="6" class="text-center">Sem logs de autores.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
   </div>
 </body>
 </html>

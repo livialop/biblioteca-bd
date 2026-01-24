@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS Emprestimos (
     Data_emprestimo DATE,
     Data_devolucao_prevista DATE,
     Data_devolucao_real DATE,
-    Status_emprestimo ENUM('pendente', 'devolvido', 'atrasado'),
+    Status_emprestimo ENUM('pendente', 'devolvido', 'atrasado', 'Em andamento'),
     FOREIGN KEY (Usuario_id) REFERENCES Usuarios(ID_usuario),
     FOREIGN KEY (Livro_id) REFERENCES Livros(ID_livro)
 );
@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS Logs_quantidade_livros (
     Data_hora DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE auditoria_autores_update (
+CREATE TABLE IF NOT EXISTS Logs_autor (
     ID_log INT AUTO_INCREMENT PRIMARY KEY,
     ID_autor INT NOT NULL,
     Campo_alterado VARCHAR(50),
@@ -103,18 +103,10 @@ CREATE TABLE auditoria_autores_update (
 );
 
 
-DELIMITER //
-CREATE TRIGGER quantidade_livro_invalida BEFORE INSERT 
-ON Livros
-FOR EACH ROW 
-BEGIN 
-    IF NEW.Quantidade_disponivel <= 0 THEN
-        SIGNAL SQLSTATE '45000' 
-        SET MESSAGE_TEXT = 'Quantidade de livros deve ser maior que zero.';
-    END IF;
-END;
-//
-DELIMITER ;
+
+
+-- TRIGGERS
+
 
 DELIMITER //
 CREATE TRIGGER data_nascimento_autor BEFORE INSERT
@@ -125,23 +117,7 @@ BEGIN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Data de nascimento não pode ser no futuro.';
     END IF;
-END;
-//
-DELIMITER ;
-
-DELIMITER // 
-CREATE TRIGGER genero_repetido BEFORE INSERT
-ON Generos
-FOR EACH ROW
-BEGIN 
-    IF NEW.Nome_genero IN (
-        SELECT Nome_genero FROM Generos
-    ) THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Gênero repetido.'
-    END IF;
-END;
-//
+END;//
 DELIMITER ;
 
 DELIMITER //
@@ -149,14 +125,35 @@ CREATE TRIGGER editora_repetida BEFORE INSERT
 ON Editoras
 FOR EACH ROW
 BEGIN
-    IF NEW.Nome_editora IN (
-        SELECT Nome_editora FROM Editoras
-    ) THEN 
+    IF EXISTS (SELECT 1 FROM Editoras WHERE Nome_editora = NEW.Nome_editora) THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Editora repetida.'
+        SET MESSAGE_TEXT = 'Editora repetida.';
     END IF;
-END;
-//
+END;//
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER genero_repetido BEFORE INSERT
+ON Generos
+FOR EACH ROW
+BEGIN
+    IF EXISTS (SELECT 1 FROM Generos WHERE Nome_genero = NEW.Nome_genero) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Gênero repetido.';
+    END IF;
+END;//
+DELIMITER ;
+
+DELIMITER //
+CREATE TRIGGER quantidade_livro_invalida BEFORE INSERT 
+ON Livros
+FOR EACH ROW 
+BEGIN 
+    IF NEW.Quantidade_disponivel <= 0 THEN
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Quantidade de livros deve ser maior que zero.';
+    END IF;
+END;//
 DELIMITER ;
 
 DELIMITER //
@@ -164,14 +161,11 @@ CREATE TRIGGER nome_usuario_repetido BEFORE INSERT
 ON Usuarios
 FOR EACH ROW
 BEGIN
-    IF NEW.Nome_usuario IN (
-        SELECT Nome_usuario FROM Usuarios
-    ) THEN 
+    IF EXISTS (SELECT 1 FROM Usuarios WHERE Nome_usuario = NEW.Nome_usuario) THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Nome de usuário repetido.'
+        SET MESSAGE_TEXT = 'Nome de usuário repetido.';
     END IF;
-END;
-//
+END;//
 DELIMITER ;
 
 -- TIGGERS AUDITORIA
@@ -183,12 +177,21 @@ FOR EACH ROW
 BEGIN
     INSERT INTO Logs_usuarios (ID_usuario, Acao)
     VALUES (NEW.ID_usuario, 'Novo usuário cadastrado');
-END;
-//
+END;//
 DELIMITER ;
 
 SELECT * FROM Logs_usuarios ORDER BY ID_log DESC;
 
+
+DELIMITER //
+CREATE TRIGGER auditoria_livro_delete
+BEFORE DELETE ON Livros
+FOR EACH ROW
+BEGIN
+    INSERT INTO Logs_livros (ID_livro, Titulo, Acao)
+    VALUES (OLD.ID_livro, OLD.Titulo, 'Livro removido do acervo');
+END;//
+DELIMITER ;
 
 DELIMITER //
 CREATE TRIGGER auditoria_status_emprestimo
@@ -199,26 +202,8 @@ BEGIN
         INSERT INTO Logs_emprestimos (ID_emprestimo, Status_antigo, Status_novo)
         VALUES (OLD.ID_emprestimo, OLD.Status_emprestimo, NEW.Status_emprestimo);
     END IF;
-END;
-//
+END;//
 DELIMITER ;
-
-SELECT * FROM Logs_emprestimos ORDER BY ID_log DESC;
-
-
-DELIMITER //
-CREATE TRIGGER auditoria_livro_delete
-BEFORE DELETE ON Livros
-FOR EACH ROW
-BEGIN
-    INSERT INTO Logs_livros (ID_livro, Titulo, Acao)
-    VALUES (OLD.ID_livro, OLD.Titulo, 'Livro removido do acervo');
-END;
-//
-DELIMITER ;
-
-SELECT * FROM Logs_livros ORDER BY ID_log DESC;
-
 
 DELIMITER //
 CREATE TRIGGER auditoria_quantidade_livro_update
@@ -229,8 +214,7 @@ BEGIN
         INSERT INTO Logs_quantidade_livros (ID_livro, Quantidade_antiga, Quantidade_nova, Acao)
         VALUES (OLD.ID_livro, OLD.Quantidade_disponivel, NEW.Quantidade_disponivel, 'Quantidade de livros atualizada');
     END IF;
-END;
-//
+END;//
 DELIMITER ;
 
 SELECT * FROM Logs_quantidade_livros ORDER BY ID_log DESC;
@@ -242,86 +226,73 @@ AFTER UPDATE ON Autores
 FOR EACH ROW
 BEGIN
     -- Nome
-    IF OLD.Nome_autor <> NEW.Nome_autor THEN
-        INSERT INTO auditoria_autores_update (ID_autor, Campo_alterado, Valor_antigo, Valor_novo)
+    IF NOT (OLD.Nome_autor <=> NEW.Nome_autor) THEN
+        INSERT INTO Logs_autor (ID_autor, Campo_alterado, Valor_antigo, Valor_novo)
         VALUES (OLD.ID_autor, 'Nome_autor', OLD.Nome_autor, NEW.Nome_autor);
     END IF;
 
     -- Nacionalidade
-    IF OLD.Nacionalidade <> NEW.Nacionalidade THEN
-        INSERT INTO auditoria_autores_update (ID_autor, Campo_alterado, Valor_antigo, Valor_novo)
+    IF NOT (OLD.Nacionalidade <=> NEW.Nacionalidade) THEN
+        INSERT INTO Logs_autor (ID_autor, Campo_alterado, Valor_antigo, Valor_novo)
         VALUES (OLD.ID_autor, 'Nacionalidade', OLD.Nacionalidade, NEW.Nacionalidade);
     END IF;
 
     -- Data Nascimento
-    IF OLD.Data_nascimento <> NEW.Data_nascimento THEN
-        INSERT INTO auditoria_autores_update (ID_autor, Campo_alterado, Valor_antigo, Valor_novo)
+    IF NOT (OLD.Data_nascimento <=> NEW.Data_nascimento) THEN
+        INSERT INTO Logs_autor (ID_autor, Campo_alterado, Valor_antigo, Valor_novo)
         VALUES (OLD.ID_autor, 'Data_nascimento', OLD.Data_nascimento, NEW.Data_nascimento);
     END IF;
 
     -- Biografia
-    IF OLD.Biografia <> NEW.Biografia THEN
-        INSERT INTO auditoria_autores_update (ID_autor, Campo_alterado, Valor_antigo, Valor_novo)
+    IF NOT (OLD.Biografia <=> NEW.Biografia) THEN
+        INSERT INTO Logs_autor (ID_autor, Campo_alterado, Valor_antigo, Valor_novo)
         VALUES (OLD.ID_autor, 'Biografia', OLD.Biografia, NEW.Biografia);
     END IF;
-END;
-//
+END;//
 
 DELIMITER ;
 
-SELECT * FROM auditoria_autores_update ORDER BY ID_log DESC;
+DELIMITER ;
 
 
 -- GERAÇÃO DE VALORES
 
--- Geração automática de valores
-
-
-
+-- Gerar automaticamente a data do empréstimo
 DELIMITER //
 CREATE TRIGGER gerar_data_emprestimo
 BEFORE INSERT ON Emprestimos
 FOR EACH ROW
 BEGIN
-    IF NEW.Data_emprestimo IS NULL THEN
-        SET NEW.Data_emprestimo = CURDATE();
-    END IF;
+    SET NEW.Data_emprestimo = CURDATE();
 END;
 //
 DELIMITER ;
 
--- 2. Definir status padrão do empréstimo
+-- Gerar automaticamente a data prevista de devolução (7 dias)
 DELIMITER //
-CREATE TRIGGER status_padrao_emprestimo
+CREATE TRIGGER gerar_data_devolucao_prevista
 BEFORE INSERT ON Emprestimos
 FOR EACH ROW
 BEGIN
-    IF NEW.Status_emprestimo IS NULL THEN
-        SET NEW.Status_emprestimo = 'pendente';
-    END IF;
+    SET NEW.Data_devolucao_prevista = DATE_ADD(CURDATE(), INTERVAL 7 DAY);
 END;
 //
 DELIMITER ;
 
--- 3. Gerar descrição automática na auditoria ao remover um livro
+-- Gerar automaticamente o status inicial do empréstimo
 DELIMITER //
-CREATE TRIGGER gerar_log_remocao_livro
-BEFORE DELETE ON Livros
+CREATE TRIGGER gerar_status_emprestimo
+BEFORE INSERT ON Emprestimos
 FOR EACH ROW
 BEGIN
-    INSERT INTO Logs_livros (ID_livro, Titulo, Acao)
-    VALUES (OLD.ID_livro, OLD.Titulo, 'Livro removido do acervo');
+    SET NEW.Status_emprestimo = 'pendente';
 END;
 //
 DELIMITER ;
 
--- AUTOMAÇÃO
-
--- Atualizar quantidade de livros ao registrar um emprestimo
-
+-- Reduzir automaticamente a quantidade de livros ao registrar empréstimo
 DELIMITER //
-
-CREATE TRIGGER diminuir_livro_emprestimo
+CREATE TRIGGER reduzir_quantidade_livro
 AFTER INSERT ON Emprestimos
 FOR EACH ROW
 BEGIN
@@ -330,7 +301,21 @@ BEGIN
     WHERE ID_livro = NEW.Livro_id;
 END;
 //
-DELIMITER;
+DELIMITER ;
+
+-- Atualizar automaticamente o status para 'atrasado'
+DELIMITER //
+CREATE TRIGGER atualizar_status_atrasado
+BEFORE UPDATE ON Emprestimos
+FOR EACH ROW
+BEGIN
+    IF NEW.Data_devolucao_real IS NULL
+       AND CURDATE() > NEW.Data_devolucao_prevista THEN
+        SET NEW.Status_emprestimo = 'atrasado';
+    END IF;
+END;
+//
+DELIMITER ;
 
 -- Aumentar a quantidade disponível ao devolver um livro
 
@@ -348,21 +333,7 @@ BEGIN
         WHERE ID_livro = NEW.Livro_id;
 
     END IF;
-END;
-//
-DELIMITER ;
-
--- Definir data prevista automaticamente
-
-DELIMITER //
-
-CREATE TRIGGER definir_data_prevista
-BEFORE INSERT ON Emprestimos
-FOR EACH ROW
-BEGIN
-    SET NEW.Data_prevista = DATE_ADD(CURDATE(), INTERVAL 7 DAY);
-END;
-//
+END;//
 DELIMITER ;
 
 -- Bloquear usuário com empréstimo em atraso
@@ -378,29 +349,33 @@ BEGIN
     SELECT COUNT(*)
     INTO atrasos
     FROM Emprestimos
-    WHERE ID_usuario = NEW.ID_usuario
+    WHERE Usuario_id = NEW.Usuario_id
       AND Status_emprestimo = 'atrasado';
 
     IF atrasos > 0 THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Usuário possui empréstimo em atraso';
     END IF;
-END;
-//
+END;//
 DELIMITER ;
-
--- Marcar livro com atrasado automaticamente 
 
 DELIMITER //
 
-CREATE TRIGGER marcar_emprestimo_atrasado
-BEFORE UPDATE ON Emprestimos
+CREATE TRIGGER bloquear_emprestimo_usuario_inadimplente
+BEFORE INSERT ON Emprestimos
 FOR EACH ROW
 BEGIN
-    IF NEW.Data_prevista < CURDATE()
-       AND NEW.Data_devolucao IS NULL THEN
-        SET NEW.Status_emprestimo = 'atrasado';
+    DECLARE total_multas DECIMAL(10,2);
+
+    SELECT IFNULL(Multa_atual, 0)
+    INTO total_multas
+    FROM Usuarios
+    WHERE ID_usuario = NEW.Usuario_id;
+
+    IF total_multas > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Usuário possui multa pendente e não pode realizar novo empréstimo';
     END IF;
-END;
-//
+END;//
+
 DELIMITER ;
