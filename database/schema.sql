@@ -252,8 +252,6 @@ END;//
 
 DELIMITER ;
 
-DELIMITER ;
-
 
 -- GERAÇÃO DE VALORES
 
@@ -290,6 +288,23 @@ END;
 //
 DELIMITER ;
 
+DELIMITER //
+
+CREATE TRIGGER aumentar_livro_devolucao
+AFTER UPDATE ON Emprestimos
+FOR EACH ROW
+BEGIN
+    IF OLD.Status_emprestimo <> 'devolvido'
+       AND NEW.Status_emprestimo = 'devolvido' THEN
+
+        UPDATE Livros
+        SET Quantidade_disponivel = Quantidade_disponivel + 1
+        WHERE ID_livro = NEW.Livro_id;
+
+    END IF;
+END;//
+DELIMITER ;
+
 -- Reduzir automaticamente a quantidade de livros ao registrar empréstimo
 DELIMITER //
 CREATE TRIGGER reduzir_quantidade_livro
@@ -318,23 +333,6 @@ END;
 DELIMITER ;
 
 -- Aumentar a quantidade disponível ao devolver um livro
-
-DELIMITER //
-
-CREATE TRIGGER aumentar_livro_devolucao
-AFTER UPDATE ON Emprestimos
-FOR EACH ROW
-BEGIN
-    IF OLD.Status_emprestimo <> 'devolvido'
-       AND NEW.Status_emprestimo = 'devolvido' THEN
-
-        UPDATE Livros
-        SET Quantidade_disponivel = Quantidade_disponivel + 1
-        WHERE ID_livro = NEW.Livro_id;
-
-    END IF;
-END;//
-DELIMITER ;
 
 -- Bloquear usuário com empréstimo em atraso
 
