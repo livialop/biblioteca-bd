@@ -5,11 +5,41 @@
 {% endblock head %}
 
 {% block content %}
-    <h1>Página Inicial</h1>
-    <p>Biblioteca das Sapas</p>
+   <!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-    {% include "components/flash.html" %}
+  <header class="header">
+    <div class="logo">JAPAN TRIP</div>
+    <nav>
+      <a href="#">Flights</a>
+      <a href="#">Hotels</a>
+      <a href="#">My Bookings</a>
+    </nav>
+  </header>
 
-    <a href="{{ url_for('auth.register') }}"><button> Register </button></a>
-    <a href="{{ url_for('auth.login') }}"><button> Login </button></a>
+  <main class="hero">
+    <div class="hero-text">
+      <p class="subtitle">BEM VINDO A</p>
+      <h1>BIBLIOTECA SAPAS</h1>
+      <p class="description">
+        Aqui é o melhor sistema para sua bibçlioteca! Gerencie seus livros, usuários e empréstimos de forma fácil e eficiente.
+      </p>
+      <a href="{{ url_for('auth.register') }}"><button> Register </button></a>
+      <a href="{{ url_for('auth.login') }}"><button> Login </button></a>
+    </div>
+
+    <div class="hero-image">
+    <img src="{{ url_for('static', filename='style/jap.png') }}" alt="Japanese landscape featuring traditional temple architecture with cherry blossoms, modern city skyline in the background, serene and inviting atmosphere representing the blend of ancient and contemporary Japan">
+    </div>
+  </main>
+
+</body>
+</html>
+
 {% endblock content %}

@@ -6,7 +6,7 @@ import re
 
 # Se o seu root não tiver senha, tire o 1234 da parte do 'root:1234@localhost:3306'
 # Se a porta do seu banco de dados for 3307, mude o 3306 para 3307.
-ENGINE = create_engine('mysql+pymysql://root:12345678@localhost:3306/db_atividade17')
+ENGINE = create_engine('mysql+pymysql://root:@localhost:3306/db_atividade17')
 # ENGINE = create_engine('mysql+mysqldb://root:1234@localhost:3306/db_atividade17')
 
 class Usuario(UserMixin):
