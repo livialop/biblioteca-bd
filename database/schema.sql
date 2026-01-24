@@ -318,6 +318,7 @@ DELIMITER ;
 -- AUTOMAÇÃO
 
 -- Atualizar quantidade de livros ao registrar um emprestimo
+
 DELIMITER //
 
 CREATE TRIGGER diminuir_livro_emprestimo
@@ -332,6 +333,7 @@ END;
 DELIMITER;
 
 -- Aumentar a quantidade disponível ao devolver um livro
+
 DELIMITER //
 
 CREATE TRIGGER aumentar_livro_devolucao
@@ -345,6 +347,59 @@ BEGIN
         SET Quantidade_disponivel = Quantidade_disponivel + 1
         WHERE ID_livro = NEW.Livro_id;
 
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- Definir data prevista automaticamente
+
+DELIMITER //
+
+CREATE TRIGGER definir_data_prevista
+BEFORE INSERT ON Emprestimos
+FOR EACH ROW
+BEGIN
+    SET NEW.Data_prevista = DATE_ADD(CURDATE(), INTERVAL 7 DAY);
+END;
+//
+DELIMITER ;
+
+-- Bloquear usuário com empréstimo em atraso
+
+DELIMITER //
+
+CREATE TRIGGER bloquear_usuario_com_atraso
+BEFORE INSERT ON Emprestimos
+FOR EACH ROW
+BEGIN
+    DECLARE atrasos INT;
+
+    SELECT COUNT(*)
+    INTO atrasos
+    FROM Emprestimos
+    WHERE ID_usuario = NEW.ID_usuario
+      AND Status_emprestimo = 'atrasado';
+
+    IF atrasos > 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Usuário possui empréstimo em atraso';
+    END IF;
+END;
+//
+DELIMITER ;
+
+-- Marcar livro com atrasado automaticamente 
+
+DELIMITER //
+
+CREATE TRIGGER marcar_emprestimo_atrasado
+BEFORE UPDATE ON Emprestimos
+FOR EACH ROW
+BEGIN
+    IF NEW.Data_prevista < CURDATE()
+       AND NEW.Data_devolucao IS NULL THEN
+        SET NEW.Status_emprestimo = 'atrasado';
     END IF;
 END;
 //
