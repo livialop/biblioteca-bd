@@ -1,20 +1,35 @@
 {% extends "base.html" %}
 
 {% block head %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='style/register.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='style/register.css') }}">
 {% endblock head %}
 
 {% block content %}
-    {% include "components/flash.html" %}
+{% include "components/flash.html" %}
 
-    <form action="{{ url_for('auth.login') }}" method="post" id="form-add">
-        <label for="email">Email</label>
-        <input type="text" name="email" placeholder="Email">
+<div class="auth-container">
 
-        <label for="senha">Senha</label>
-        <input type="password" name="senha" placeholder="Senha">
+    <div class="auth-illustration">
+        <img src="{{ url_for('static', filename='style/fuji.jpg') }}" alt="Ilustração Japão">
+    </div>
 
-        <button>Enviar</button>
-    </form>
+    <div class="auth-card">
+        <h1>Login</h1>
 
+        <form action="{{ url_for('auth.login') }}" method="post" id="form-add">
+            <label>Email</label>
+            <input type="text" name="email" placeholder="Email">
+
+            <label>Senha</label>
+            <input type="password" name="senha" placeholder="Senha">
+
+            <button>Entrar</button>
+        </form>
+
+        <div class="auth-extra">
+            Não tem conta? <a href="{{ url_for('auth.register') }}">Cadastre-se</a>
+        </div>
+    </div>
+
+</div>
 {% endblock content %}

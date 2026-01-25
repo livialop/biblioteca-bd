@@ -1,24 +1,41 @@
 {% extends "base.html" %}
 
 {% block head %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='style/register.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='style/register.css') }}">
 {% endblock head %}
 
 {% block content %}
-    {% include "components/flash.html" %}
-    <form action="{{ url_for('auth.register')}}" method="post" id="form-add">
-        <label for="nome">Nome:</label>
-        <input type="text" name="nome" placeholder="nome" required>
+{% include "components/flash.html" %}
 
-        <label for="email">Email:</label>
-        <input type="text" name="email" placeholder="email" required>
+<div class="auth-container">
 
-        <label for="senha">Número de telefone:</label>
-        <input type="number" name="numero_telefone" placeholder="número de telefone" maxlength="15">
+    <div class="auth-illustration">
+        <img src="{{ url_for('static', filename='style/fuji.jpg') }}" alt="Ilustração Japão">
+    </div>
 
-        <label for="senha">Senha:</label>
-        <input type="password" name="senha" placeholder="senha" required>
+    <div class="auth-card">
+        <h1>Cadastrar</h1>
 
-        <button>Enviar</button>
-    </form>
+        <form action="{{ url_for('auth.register') }}" method="post" id="form-add">
+            <label>Nome</label>
+            <input type="text" name="nome" placeholder="Nome" required>
+
+            <label>Email</label>
+            <input type="text" name="email" placeholder="Email" required>
+
+            <label>Número de telefone</label>
+            <input type="number" name="numero_telefone" placeholder="Telefone" maxlength="15">
+
+            <label>Senha</label>
+            <input type="password" name="senha" placeholder="Senha" required>
+
+            <button>Cadastrar</button>
+        </form>
+
+        <div class="auth-extra">
+            Já tem conta? <a href="{{ url_for('auth.login') }}">Entrar</a>
+        </div>
+    </div>
+
+</div>
 {% endblock content %}

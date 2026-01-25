@@ -1,45 +1,74 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
 
 body {
-    padding-top: 40px;
+  background-color: #fde4ec;
 }
 
-h1 {
-    text-align: center;
-    font-size: 32px;
-    font-weight: 600;
-    margin-bottom: 20px;
-    color: #333;
+/* HEADER */
+.header {
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 60px;
+  border-radius: 20px;
+  margin: 30px;
 }
 
-
-p {
-    text-align: center;
-    font-size: 18px;
-    color: #555;
-    margin-bottom: 30px;
+.header nav a {
+  margin-left: 30px;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
 }
 
-
-a {
-    text-decoration: none;
+/* HERO */
+.hero {
+  background: #fff;
+  margin: 30px;
+  border-radius: 30px;
+  padding: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
+/* TEXTO */
+.hero-text {
+  max-width: 40%;
+}
+
+.subtitle {
+  letter-spacing: 2px;
+  color: #777;
+}
+
+.hero-text h1 {
+  font-size: 64px;
+  color: #e94b7c;
+}
+
+.description {
+  margin: 20px 0;
+  color: #555;
+}
 
 button {
-    background-color: #0d6efd;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-border-radius: 8px;
-    font-size: 17px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: 0.2s ease;
-    margin: 10px auto;
-    display: block; /* Centraliza */
-    width: 200px;
+  background: #f48fb1;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 30px;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
 }
 
-button:hover {
-    background-color: #0b5ed7;
+/* IMAGEM */
+.hero-image img {
+  width: 450px;
 }
