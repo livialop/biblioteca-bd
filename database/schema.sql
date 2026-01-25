@@ -332,6 +332,17 @@ END;
 //
 DELIMITER ;
 
+DELIMITER //
+CREATE TRIGGER marcar_emprestimo_atrasado
+BEFORE INSERT ON Emprestimos
+FOR EACH ROW
+BEGIN
+    IF NEW.Data_devolucao_prevista < CURDATE() THEN
+        SET NEW.Status_emprestimo = 'atrasado';
+    END IF;
+END;//
+DELIMITER ;
+
 -- Aumentar a quantidade disponível ao devolver um livro
 
 -- Bloquear usuário com empréstimo em atraso
