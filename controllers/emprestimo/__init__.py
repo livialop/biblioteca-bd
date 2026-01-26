@@ -1,6 +1,7 @@
 from flask import render_template, redirect, url_for, request, Blueprint, flash
 from flask_login import login_required
 from sqlalchemy import text
+from sqlalchemy.exc import DBAPIError
 from config import ENGINE
 
 emprestimo_bp = Blueprint('emprestimo', __name__, static_folder='static', template_folder='templates')
@@ -84,12 +85,13 @@ def add_emprestimo():
             
             return redirect(url_for('emprestimo.view_emprestimos'))
         
-        except Exception as e:
-            mensagem_erro = str(e)
-            if '45000' in mensagem_erro:
-                flash(f'Erro: {mensagem_erro}', category='danger')
-            else:
-                flash(f'Erro: {mensagem_erro}', category='danger')
+        except DBAPIError as e:
+            # Extrai mensagem enviada pelo SIGNAL no trigger (ex: MySQL via PyMySQL: orig.args == (45000, 'mensagem'))
+            # O DPABIError vem do mysqlalchemy e pega a exception quando acontece erro no banco de dados. 'orig' é o erro vindo do mysql. o 'orig.args[1]' é a mensagem do signal.
+            erro_mysql = ''
+            orig = e.orig
+            erro_mysql = orig.args[1]
+            flash(erro_mysql, 'danger')
             return redirect(url_for('emprestimo.add_emprestimo'))
     
 

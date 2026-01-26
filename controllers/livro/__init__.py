@@ -1,6 +1,7 @@
 from flask import render_template, redirect, url_for, request, Blueprint, flash
 from flask_login import login_required, current_user
 from sqlalchemy import text
+from sqlalchemy.exc import DBAPIError
 from config import ENGINE
 
 
@@ -20,33 +21,44 @@ def add_livro():
         quantidade = request.form.get('quantidade')
         resumo = request.form.get('resumo')
 
+        # try:
+        #     quantidade_int = int(quantidade)
+        #     if quantidade_int <= 0:
+        #         flash('Quantidade de livros deve ser maior que zero.', 'danger')
+        #         return redirect(url_for('livros.add_livro'))
+        # except (TypeError, ValueError):
+        #     flash('Quantidade inválida.', 'danger')
+        #     return redirect(url_for('livros.add_livro'))
+
         try:
             quantidade_int = int(quantidade)
-            if quantidade_int <= 0:
-                flash('Quantidade de livros deve ser maior que zero.', 'danger')
-                return redirect(url_for('livros.add_livro'))
-        except (TypeError, ValueError):
-            flash('Quantidade inválida.', 'danger')
-            return redirect(url_for('livros.add_livro'))
+            with ENGINE.begin() as conn:
+                conn.execute(text("""
+                    INSERT INTO Livros 
+                    (Titulo, Autor_id, ISBN, Ano_publicacao, Genero_id, Editora_id, Quantidade_disponivel, Resumo)
+                    VALUES (:titulo, :autor_id, :isbn, :ano, :genero_id, :editora_id, :quantidade, :resumo)
+                """), {
+                    "titulo": titulo,
+                    "autor_id": autor_id,
+                    "isbn": isbn,
+                    "ano": ano,
+                    "genero_id": genero_id,
+                    "editora_id": editora_id,
+                    "quantidade": quantidade_int,
+                    "resumo": resumo
+                })
 
-        with ENGINE.begin() as conn:
-            conn.execute(text("""
-                INSERT INTO Livros 
-                (Titulo, Autor_id, ISBN, Ano_publicacao, Genero_id, Editora_id, Quantidade_disponivel, Resumo)
-                VALUES (:titulo, :autor_id, :isbn, :ano, :genero_id, :editora_id, :quantidade, :resumo)
-            """), {
-                "titulo": titulo,
-                "autor_id": autor_id,
-                "isbn": isbn,
-                "ano": ano,
-                "genero_id": genero_id,
-                "editora_id": editora_id,
-                "quantidade": quantidade_int,
-                "resumo": resumo
-            })
-
-        flash(f"Livro '{titulo}' adicionado com sucesso.", 'success')
-        return redirect(url_for('livros.view_livros'))
+            flash(f"Livro '{titulo}' adicionado com sucesso.", 'success')
+            return redirect(url_for('livros.view_livros'))
+        except DBAPIError as e:
+            # Extrai mensagem enviada pelo SIGNAL no trigger (ex: MySQL via PyMySQL: orig.args == (45000, 'mensagem'))
+            # O DPABIError vem do mysqlalchemy e pega a exception quando acontece erro no banco de dados. 'orig' é o erro vindo do mysql. o 'orig.args[1]' é a mensagem do signal.
+            erro_mysql = ''
+            orig = e.orig
+            erro_mysql = orig.args[1]
+            flash(erro_mysql, 'danger')
+        except Exception as e:
+            flash(str(e), 'danger')
 
     with ENGINE.connect() as conn:
         autores = conn.execute(text("SELECT * FROM Autores;")).mappings().all()

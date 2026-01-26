@@ -1,6 +1,7 @@
 from flask import render_template, redirect, url_for, Blueprint, flash, request
 from flask_login import login_required
 from sqlalchemy import text
+from sqlalchemy.exc import DBAPIError
 from config import ENGINE
 
 editora_bp = Blueprint('editora', __name__, static_folder='static', template_folder='templates')
@@ -14,16 +15,6 @@ def add_editora():
 
         try:
             with ENGINE.begin() as conn:
-                editora_existe = conn.execute(text(
-                    """SELECT 1 FROM Editoras WHERE Nome_editora = :nome_editora"""
-                ), {
-                    'nome_editora': nome_editora
-                }).scalar()
-
-                if editora_existe:
-                    flash('Editora repetida.', category='danger')
-                    return redirect(url_for('editora.add_editora'))
-
                 conn.execute(text("""
                     INSERT INTO Editoras 
                     (Nome_editora, Endereco_editora)
@@ -36,8 +27,16 @@ def add_editora():
             flash(f"Editora '{nome_editora}' adicionada.", category='success')
             return redirect(url_for('livros.add_livro'))
 
+        except DBAPIError as e:
+            # Extrai mensagem enviada pelo SIGNAL no trigger (ex: MySQL via PyMySQL: orig.args == (45000, 'mensagem'))
+            # O DPABIError vem do mysqlalchemy e pega a exception quando acontece erro no banco de dados. 'orig' é o erro vindo do mysql. o 'orig.args[1]' é a mensagem do signal.
+            erro_mysql = ''
+            orig = e.orig
+            erro_mysql = orig.args[1]
+            flash(erro_mysql, 'danger')
+            return redirect(url_for('editora.add_editora'))
         except Exception as e:
-            flash(f'Erro {str(e)}', category='danger')
+            flash(str(e), 'danger')
             return redirect(url_for('editora.add_editora'))
 
     return render_template('add_editora.html')

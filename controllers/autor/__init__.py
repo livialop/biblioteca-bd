@@ -2,6 +2,7 @@ from flask import render_template, redirect, url_for, request, Blueprint, flash
 from datetime import date, datetime
 from flask_login import login_required
 from sqlalchemy import text
+from sqlalchemy.exc import DBAPIError
 from config import ENGINE
 
 autor_bp = Blueprint('autor', __name__, static_folder='static', template_folder='templates')
@@ -14,16 +15,6 @@ def add_autor():
         nacionalidade = request.form.get('nacionalidade')
         data_nascimento = request.form.get('data_nascimento')
         biografia = request.form.get('biografia')
-
-        if data_nascimento:
-            try:
-                data_nascimento_date = datetime.strptime(data_nascimento, "%Y-%m-%d").date()
-                if data_nascimento_date > date.today():
-                    flash('Data de nascimento não pode ser no futuro.', 'danger')
-                    return redirect(url_for('autor.add_autor'))
-            except ValueError:
-                flash('Data de nascimento inválida.', 'danger')
-                return redirect(url_for('autor.add_autor'))
 
         try:
             with ENGINE.begin() as conn:
@@ -40,9 +31,14 @@ def add_autor():
 
                 flash(f"Autor '{nome_autor}' adicionado com sucesso!", 'success')
                 return redirect(url_for('livros.add_livro'))
-            
-        except Exception as e:
-            flash(f'Erro ao adicionar autor: {str(e)}', 'danger')
+        
+        except DBAPIError as e:
+            # Extrai mensagem enviada pelo SIGNAL no trigger (ex: MySQL via PyMySQL: orig.args == (45000, 'mensagem'))
+            # O DPABIError vem do mysqlalchemy e pega a exception quando acontece erro no banco de dados. 'orig' é o erro vindo do mysql. o 'orig.args[1]' é a mensagem do signal.
+            erro_mysql = ''
+            orig = e.orig
+            erro_mysql = orig.args[1]
+            flash(erro_mysql, 'danger')
             return redirect(url_for('autor.add_autor'))
 
     return render_template('add_autor.html')

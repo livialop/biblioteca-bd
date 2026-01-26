@@ -105,11 +105,11 @@ CREATE TABLE IF NOT EXISTS Logs_autor (
 
 
 
--- TRIGGERS
+------------- TRIGGERS VALIDAÇÃO ----------------
 
-
+-- Validação 1
 DELIMITER //
-CREATE TRIGGER data_nascimento_autor BEFORE INSERT
+CREATE TRIGGER data_nascimento_autor BEFORE INSERT -- OK NA APLICACAO
 ON Autores
 FOR EACH ROW
 BEGIN
@@ -120,8 +120,9 @@ BEGIN
 END;//
 DELIMITER ;
 
+-- Validação 2
 DELIMITER //
-CREATE TRIGGER editora_repetida BEFORE INSERT
+CREATE TRIGGER editora_repetida BEFORE INSERT  -- OK NA APLICACAO
 ON Editoras
 FOR EACH ROW
 BEGIN
@@ -132,8 +133,9 @@ BEGIN
 END;//
 DELIMITER ;
 
+-- Validação 3
 DELIMITER //
-CREATE TRIGGER genero_repetido BEFORE INSERT
+CREATE TRIGGER genero_repetido BEFORE INSERT -- OK NA APLICACAO
 ON Generos
 FOR EACH ROW
 BEGIN
@@ -144,8 +146,9 @@ BEGIN
 END;//
 DELIMITER ;
 
+-- Validação 4
 DELIMITER //
-CREATE TRIGGER quantidade_livro_invalida BEFORE INSERT 
+CREATE TRIGGER quantidade_livro_invalida BEFORE INSERT -- OK NA APLICACAO
 ON Livros
 FOR EACH ROW 
 BEGIN 
@@ -156,8 +159,22 @@ BEGIN
 END;//
 DELIMITER ;
 
+-- Validação 5
 DELIMITER //
-CREATE TRIGGER nome_usuario_repetido BEFORE INSERT
+CREATE TRIGGER ano_futuro_livro BEFORE INSERT -- OK NA APLICACAO
+ON Livros
+FOR EACH ROW
+BEGIN
+    IF NEW.Ano_publicacao > YEAR(CURDATE()) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'A data de publicação do livro não pode ser no futuro.';
+    END IF;
+END;//
+DELIMITER ; 
+
+-- Validação 6
+DELIMITER //
+CREATE TRIGGER nome_usuario_repetido BEFORE INSERT -- OK NA APLICACAO
 ON Usuarios
 FOR EACH ROW
 BEGIN
@@ -168,10 +185,11 @@ BEGIN
 END;//
 DELIMITER ;
 
--- TIGGERS AUDITORIA
+------------- TRIGGERS AUDITORIA ----------------
 
+-- Auditoria 1
 DELIMITER //
-CREATE TRIGGER auditoria_usuario_insert
+CREATE TRIGGER auditoria_usuario_insert -- OK NA APLICACAO
 AFTER INSERT ON Usuarios
 FOR EACH ROW
 BEGIN
@@ -182,9 +200,9 @@ DELIMITER ;
 
 SELECT * FROM Logs_usuarios ORDER BY ID_log DESC;
 
-
+-- Auditoria 2
 DELIMITER //
-CREATE TRIGGER auditoria_livro_delete
+CREATE TRIGGER auditoria_livro_delete -- OK NA APLICACAO
 BEFORE DELETE ON Livros
 FOR EACH ROW
 BEGIN
@@ -193,58 +211,59 @@ BEGIN
 END;//
 DELIMITER ;
 
+-- Auditoria 3
 DELIMITER //
-CREATE TRIGGER auditoria_status_emprestimo
+CREATE TRIGGER auditoria_status_emprestimo -- OK NA APLICACAO
 AFTER UPDATE ON Emprestimos
 FOR EACH ROW
 BEGIN
-    IF OLD.Status_emprestimo <> NEW.Status_emprestimo THEN
+    IF OLD.Status_emprestimo != NEW.Status_emprestimo THEN
         INSERT INTO Logs_emprestimos (ID_emprestimo, Status_antigo, Status_novo)
         VALUES (OLD.ID_emprestimo, OLD.Status_emprestimo, NEW.Status_emprestimo);
     END IF;
 END;//
 DELIMITER ;
 
+-- Auditoria 4
 DELIMITER //
-CREATE TRIGGER auditoria_quantidade_livro_update
+CREATE TRIGGER auditoria_quantidade_livro_update -- OK NA APLICACAO
 AFTER UPDATE ON Livros
 FOR EACH ROW
 BEGIN
-    IF OLD.Quantidade_disponivel <> NEW.Quantidade_disponivel THEN
+    IF OLD.Quantidade_disponivel != NEW.Quantidade_disponivel THEN
         INSERT INTO Logs_quantidade_livros (ID_livro, Quantidade_antiga, Quantidade_nova, Acao)
         VALUES (OLD.ID_livro, OLD.Quantidade_disponivel, NEW.Quantidade_disponivel, 'Quantidade de livros atualizada');
     END IF;
 END;//
 DELIMITER ;
 
-SELECT * FROM Logs_quantidade_livros ORDER BY ID_log DESC;
-
+-- Auditoria 5
 DELIMITER //
 
-CREATE TRIGGER auditoria_autor_update
+CREATE TRIGGER auditoria_autor_update -- OK NA APLICACAO
 AFTER UPDATE ON Autores
 FOR EACH ROW
 BEGIN
     -- Nome
-    IF NOT (OLD.Nome_autor <=> NEW.Nome_autor) THEN
+    IF (OLD.Nome_autor != NEW.Nome_autor) THEN
         INSERT INTO Logs_autor (ID_autor, Campo_alterado, Valor_antigo, Valor_novo)
         VALUES (OLD.ID_autor, 'Nome_autor', OLD.Nome_autor, NEW.Nome_autor);
     END IF;
 
     -- Nacionalidade
-    IF NOT (OLD.Nacionalidade <=> NEW.Nacionalidade) THEN
+    IF (OLD.Nacionalidade != NEW.Nacionalidade) THEN
         INSERT INTO Logs_autor (ID_autor, Campo_alterado, Valor_antigo, Valor_novo)
         VALUES (OLD.ID_autor, 'Nacionalidade', OLD.Nacionalidade, NEW.Nacionalidade);
     END IF;
 
     -- Data Nascimento
-    IF NOT (OLD.Data_nascimento <=> NEW.Data_nascimento) THEN
+    IF (OLD.Data_nascimento != NEW.Data_nascimento) THEN
         INSERT INTO Logs_autor (ID_autor, Campo_alterado, Valor_antigo, Valor_novo)
         VALUES (OLD.ID_autor, 'Data_nascimento', OLD.Data_nascimento, NEW.Data_nascimento);
     END IF;
 
     -- Biografia
-    IF NOT (OLD.Biografia <=> NEW.Biografia) THEN
+    IF (OLD.Biografia != NEW.Biografia) THEN
         INSERT INTO Logs_autor (ID_autor, Campo_alterado, Valor_antigo, Valor_novo)
         VALUES (OLD.ID_autor, 'Biografia', OLD.Biografia, NEW.Biografia);
     END IF;
@@ -253,11 +272,12 @@ END;//
 DELIMITER ;
 
 
--- GERAÇÃO DE VALORES
 
--- Gerar automaticamente a data do empréstimo
+------------- TRIGGERS GERAÇÃO DE VALORES ----------------
+
+-- Geração Automática de Valores 1
 DELIMITER //
-CREATE TRIGGER gerar_data_emprestimo
+CREATE TRIGGER gerar_data_emprestimo -- OK NA APLICACAO
 BEFORE INSERT ON Emprestimos
 FOR EACH ROW
 BEGIN
@@ -266,90 +286,71 @@ END;
 //
 DELIMITER ;
 
+-- Geração Automática de Valores 2
 -- Gerar automaticamente a data prevista de devolução (7 dias)
 DELIMITER //
-CREATE TRIGGER gerar_data_devolucao_prevista
+CREATE TRIGGER gerar_data_devolucao_prevista -- OK NA APLICACAO
 BEFORE INSERT ON Emprestimos
 FOR EACH ROW
 BEGIN
-    SET NEW.Data_devolucao_prevista = DATE_ADD(CURDATE(), INTERVAL 7 DAY);
+    IF NEW.Data_devolucao_prevista IS NULL THEN
+        SET NEW.Data_devolucao_prevista = DATE_ADD(CURDATE(), INTERVAL 7 DAY);
+    END IF;
 END;
 //
 DELIMITER ;
 
+-- Geração Automática de Valores 3
 -- Gerar automaticamente o status inicial do empréstimo
 DELIMITER //
-CREATE TRIGGER gerar_status_emprestimo
+CREATE TRIGGER gerar_status_emprestimo -- OK NA APLICACAO
 BEFORE INSERT ON Emprestimos
 FOR EACH ROW
 BEGIN
-    SET NEW.Status_emprestimo = 'pendente';
-END;
-//
-DELIMITER ;
-
-DELIMITER //
-
-CREATE TRIGGER aumentar_livro_devolucao
-AFTER UPDATE ON Emprestimos
-FOR EACH ROW
-BEGIN
-    IF OLD.Status_emprestimo <> 'devolvido'
-       AND NEW.Status_emprestimo = 'devolvido' THEN
-
-        UPDATE Livros
-        SET Quantidade_disponivel = Quantidade_disponivel + 1
-        WHERE ID_livro = NEW.Livro_id;
-
+    -- Só definir status automático se o campo não foi informado pela aplicação
+    IF NEW.Status_emprestimo IS NULL THEN
+        IF NEW.Data_devolucao_prevista IS NOT NULL AND CURDATE() <= NEW.Data_devolucao_prevista THEN
+            SET NEW.Status_emprestimo = 'pendente';
+        END IF;
     END IF;
 END;//
 DELIMITER ;
 
--- Reduzir automaticamente a quantidade de livros ao registrar empréstimo
-DELIMITER //
-CREATE TRIGGER reduzir_quantidade_livro
-AFTER INSERT ON Emprestimos
-FOR EACH ROW
-BEGIN
-    UPDATE Livros
-    SET Quantidade_disponivel = Quantidade_disponivel - 1
-    WHERE ID_livro = NEW.Livro_id;
-END;
-//
-DELIMITER ;
-
+-- Geração Automática de Valores 4
 -- Atualizar automaticamente o status para 'atrasado'
 DELIMITER //
-CREATE TRIGGER atualizar_status_atrasado
-BEFORE UPDATE ON Emprestimos
+CREATE TRIGGER atualizar_status_atrasado -- OK NA APLICACAO
+BEFORE INSERT ON Emprestimos
 FOR EACH ROW
 BEGIN
-    IF NEW.Data_devolucao_real IS NULL
-       AND CURDATE() > NEW.Data_devolucao_prevista THEN
-        SET NEW.Status_emprestimo = 'atrasado';
+    IF NEW.Data_devolucao_real IS NULL THEN
+        IF NEW.Data_devolucao_prevista < CURDATE() THEN
+            SET NEW.Status_emprestimo = 'atrasado';
+        END IF;
     END IF;
 END;
 //
 DELIMITER ;
 
+-- Geração Automática de Valores 5
+-- Definir multa inicial como zero ao cadastrar usuário
 DELIMITER //
-CREATE TRIGGER marcar_emprestimo_atrasado
-BEFORE INSERT ON Emprestimos
+CREATE TRIGGER definir_multa_inicial -- OK NA APLICACAO
+BEFORE INSERT ON Usuarios
 FOR EACH ROW
 BEGIN
-    IF NEW.Data_devolucao_prevista < CURDATE() THEN
-        SET NEW.Status_emprestimo = 'atrasado';
-    END IF;
-END;//
+    SET NEW.Multa_atual = 0.00;
+END;
+//
 DELIMITER ;
 
--- Aumentar a quantidade disponível ao devolver um livro
+------------- TRIGGERS ATUALIZAÇÃO AUTOMÁTICA ----------------
 
+-- Atualização Automática Pós-Evento 1
 -- Bloquear usuário com empréstimo em atraso
-
 DELIMITER //
 
-CREATE TRIGGER bloquear_usuario_com_atraso
+CREATE TRIGGER bloquear_usuario_com_atraso -- OK NA APLICAÇÃO
 BEFORE INSERT ON Emprestimos
 FOR EACH ROW
 BEGIN
@@ -370,7 +371,8 @@ DELIMITER ;
 
 DELIMITER //
 
-CREATE TRIGGER bloquear_emprestimo_usuario_inadimplente
+-- Atualização Automática Pós-Evento 2
+CREATE TRIGGER bloquear_emprestimo_usuario_inadimplente -- OK NA APLICACAO
 BEFORE INSERT ON Emprestimos
 FOR EACH ROW
 BEGIN
@@ -388,3 +390,56 @@ BEGIN
 END;//
 
 DELIMITER ;
+
+-- Atualização Automática Pós-Evento 3
+CREATE TRIGGER aumentar_livro_devolucao  -- OK NA APLICACAO
+AFTER UPDATE ON Emprestimos
+FOR EACH ROW
+BEGIN
+    IF OLD.Status_emprestimo <> 'devolvido'
+       AND NEW.Status_emprestimo = 'devolvido' THEN
+
+        UPDATE Livros
+        SET Quantidade_disponivel = Quantidade_disponivel + 1
+        WHERE ID_livro = NEW.Livro_id;
+
+    END IF;
+END;//
+DELIMITER ;
+
+-- Atualização Automática Pós-Evento 4
+-- Reduzir automaticamente a quantidade de livros ao registrar empréstimo
+DELIMITER //
+CREATE TRIGGER reduzir_quantidade_livro -- OK NA APLICACAO
+AFTER INSERT ON Emprestimos
+FOR EACH ROW
+BEGIN
+    UPDATE Livros
+    SET Quantidade_disponivel = Quantidade_disponivel - 1
+    WHERE ID_livro = NEW.Livro_id;
+END;
+//
+DELIMITER ;
+
+
+-- Atualização Automática Pós-Evento 5
+-- Definir valor da multa por atraso de livro (são 2 reais por dia de atraso)
+DELIMITER //
+CREATE TRIGGER calcular_multa_atraso -- OK NA APLICACAO
+AFTER UPDATE ON Emprestimos
+FOR EACH ROW
+BEGIN
+    DECLARE dias_atraso INT DEFAULT 0;
+    DECLARE valor_multa DECIMAL(10,2) DEFAULT 0.00;
+
+    IF NEW.Status_emprestimo = 'devolvido' AND OLD.Status_emprestimo = 'atrasado' THEN
+        SET dias_atraso = DATEDIFF(CURDATE(), NEW.Data_devolucao_prevista);
+        IF dias_atraso > 0 THEN
+            SET valor_multa = dias_atraso * 2.00;
+            UPDATE Usuarios
+            SET Multa_atual = Multa_atual + valor_multa
+            WHERE ID_usuario = NEW.Usuario_id;
+        END IF;
+    END IF;
+END;
+//

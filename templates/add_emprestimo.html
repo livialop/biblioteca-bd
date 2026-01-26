@@ -36,7 +36,7 @@
 
         <div class="mb-3">
           <label class="form-label">Data de Devolução Prevista</label>
-          <input type="date" class="form-control" name="data_devolucao_prevista" required>
+          <input type="date" class="form-control" name="data_devolucao_prevista">
  
         <div class="mb-3">
           <label class="form-label">Data de Devolução Real</label>
@@ -45,7 +45,7 @@
 
         <div class="mb-3">
           <label class="form-label">Status do Empréstimo</label>
-          <select class="form-select" name="status_emprestimo" required>
+          <select class="form-select" name="status_emprestimo">
             <option value="" selected disabled>Selecione</option>
 
             {% for item in valores_status_emprestimo %}

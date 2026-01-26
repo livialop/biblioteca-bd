@@ -1,6 +1,7 @@
 from flask import render_template, redirect, url_for, request, Blueprint, flash
 from flask_login import login_user, logout_user, login_required
 from sqlalchemy import text
+from sqlalchemy.exc import DBAPIError
 from werkzeug.security import generate_password_hash, check_password_hash
 from config import Usuario, ENGINE
 
@@ -14,49 +15,46 @@ def register():
         numero_telefone: str = request.form.get('numero_telefone')
         senha: str = request.form.get('senha')
 
-        query_user_existe = text("SELECT * FROM Usuarios WHERE Email = :email")
-        query_nome_existe = text("SELECT 1 FROM Usuarios WHERE Nome_usuario = :nome")
-        with ENGINE.connect() as conn:
-            user_existe = conn.execute(query_user_existe, {'email': email}).fetchone()
-            if user_existe:
-                flash('Email já cadastrado!', category='error')
-                return redirect(url_for('auth.login'))
+        try:
+            with ENGINE.connect() as conn:
+                senha_hash = generate_password_hash(senha)
 
-            nome_existe = conn.execute(query_nome_existe, {'nome': nome}).scalar()
-            if nome_existe:
-                flash('Nome de usuário repetido.', category='error')
-                return redirect(url_for('auth.register'))
+                query_insert = text("""
+                    INSERT INTO Usuarios (Nome_usuario, Email, Numero_telefone, senha)
+                    VALUES (:nome, :email, :numero_telefone, :senha)
+                """)
 
-            senha_hash = generate_password_hash(senha)
+                conn.execute(query_insert, {
+                    'nome': nome,
+                    'email': email,
+                    'numero_telefone': numero_telefone,
+                    'senha': senha_hash
+                })
+                conn.commit()
 
-            query_insert = text("""
-                INSERT INTO Usuarios (Nome_usuario, Email, Numero_telefone, senha)
-                VALUES (:nome, :email, :numero_telefone, :senha)
-            """)
+                query_user = text("SELECT * FROM Usuarios WHERE Email = :email")
+                novo_user = conn.execute(query_user, {'email': email}).mappings().fetchone()
+                
+                if novo_user:
+                    user_obj = Usuario(
+                        id_usuario=novo_user['ID_usuario'],
+                        email=novo_user['Email'],
+                        senha=novo_user['senha']
+                    )
 
-            conn.execute(query_insert, {
-                'nome': nome,
-                'email': email,
-                'numero_telefone': numero_telefone,
-                'senha': senha_hash
-            })
-            conn.commit()
+                    login_user(user_obj)
 
-            query_user = text("SELECT * FROM Usuarios WHERE Email = :email")
-            novo_user = conn.execute(query_user, {'email': email}).mappings().fetchone()
-
-            if novo_user:
-
-                user_obj = Usuario(
-                    id_usuario=novo_user['ID_usuario'],
-                    email=novo_user['Email'],
-                    senha=novo_user['senha']
-                )
-
-                login_user(user_obj)
-
-                flash('Cadastro realizado e login efetuado com sucesso!', category='success')
-                return redirect(url_for('auth.login'))
+                    flash('Cadastro realizado e login efetuado com sucesso!', category='success')
+                    return redirect(url_for('auth.login'))
+        
+        except DBAPIError as e:
+            # Extrai mensagem enviada pelo SIGNAL no trigger (ex: MySQL via PyMySQL: orig.args == (45000, 'mensagem'))
+            # O DPABIError vem do mysqlalchemy e pega a exception quando acontece erro no banco de dados. 'orig' é o erro vindo do mysql. o 'orig.args[1]' é a mensagem do signal.
+            erro_mysql = ''
+            orig = e.orig
+            erro_mysql = orig.args[1]
+            flash(erro_mysql, 'danger')
+            return redirect(url_for('auth.register'))
 
     return render_template('register.html')
 
