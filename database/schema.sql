@@ -126,7 +126,9 @@ CREATE TRIGGER editora_repetida BEFORE INSERT  -- OK NA APLICACAO
 ON Editoras
 FOR EACH ROW
 BEGIN
-    IF EXISTS (SELECT 1 FROM Editoras WHERE Nome_editora = NEW.Nome_editora) THEN
+    IF EXISTS (
+        SELECT * FROM Editoras WHERE Nome_editora = NEW.Nome_editora
+    ) THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Editora repetida.';
     END IF;
@@ -139,7 +141,9 @@ CREATE TRIGGER genero_repetido BEFORE INSERT -- OK NA APLICACAO
 ON Generos
 FOR EACH ROW
 BEGIN
-    IF EXISTS (SELECT 1 FROM Generos WHERE Nome_genero = NEW.Nome_genero) THEN
+    IF EXISTS (
+        SELECT * FROM Generos WHERE Nome_genero = NEW.Nome_genero
+    ) THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Gênero repetido.';
     END IF;
@@ -178,7 +182,9 @@ CREATE TRIGGER nome_usuario_repetido BEFORE INSERT -- OK NA APLICACAO
 ON Usuarios
 FOR EACH ROW
 BEGIN
-    IF EXISTS (SELECT 1 FROM Usuarios WHERE Nome_usuario = NEW.Nome_usuario) THEN
+    IF EXISTS (
+        SELECT * FROM Usuarios WHERE Nome_usuario = NEW.Nome_usuario
+    ) THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Nome de usuário repetido.';
     END IF;
@@ -354,15 +360,16 @@ CREATE TRIGGER bloquear_usuario_com_atraso -- OK NA APLICAÇÃO
 BEFORE INSERT ON Emprestimos
 FOR EACH ROW
 BEGIN
-    DECLARE atrasos INT;
 
-    SELECT COUNT(*)
-    INTO atrasos
-    FROM Emprestimos
-    WHERE Usuario_id = NEW.Usuario_id
-      AND Status_emprestimo = 'atrasado';
+    DECLARE emprestimo_atrasado BOOLEAN;
 
-    IF atrasos > 0 THEN
+    SELECT EXISTS (
+        SELECT * FROM Emprestimos
+        WHERE Usuario_id = NEW.Usuario_id
+          AND Status_emprestimo = 'atrasado'
+    ) INTO emprestimo_atrasado;
+
+    IF emprestimo_atrasado THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Usuário possui empréstimo em atraso';
     END IF;
@@ -396,7 +403,7 @@ CREATE TRIGGER aumentar_livro_devolucao  -- OK NA APLICACAO
 AFTER UPDATE ON Emprestimos
 FOR EACH ROW
 BEGIN
-    IF OLD.Status_emprestimo <> 'devolvido'
+    IF OLD.Status_emprestimo != 'devolvido'
        AND NEW.Status_emprestimo = 'devolvido' THEN
 
         UPDATE Livros
